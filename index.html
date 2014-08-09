@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+    <link rel="stylesheet" href="public/stylesheets/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="public/stylesheets/app.css" type="text/css" />
+    <meta charset="utf-8" />
+
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="col col-md-12" id="main-content">
+
+
+          <div class="row">
+            <div id="new-task-input-box" class="col col-md-4 col-md-offset-4">
+              <input type="text" id="new-task-input" class="form-control" value="" placeholder="Add a new task"/>
+            </div>
+          </div>
+
+          <div class="row">
+            <ul class="col col-md-3">
+              <div class="projects-list">
+
+              </div>
+            </ul>
+
+            <div class="task-box-area col col-md-9">
+              <div class="task-box-row row">
+                <div class="col col-md-6">
+                  <span class="task-box-title">Urgent + important</span>
+                  <div class="task-box">
+                    <div class="task-list" id="urgent-important-list">
+
+                    </div>
+                  </div>
+                  <span class="task-box-title">Urgent + not important</span>
+                  <div class="task-box">
+                    <div class="task-list" id="urgent-not-important-list">
+
+                    </div>
+                  </div>
+                </div>
+                <div class="col col-md-6">
+                  <span class="task-box-title">Not urgent + important</span>
+                  <div class="task-box">
+                    <div class="task-list" id="not-urgent-important-list">
+
+                    </div>
+                  </div>
+                  <span class="task-box-title">Not urgent + not important</span>
+                  <div class="task-box">
+                    <div class="task-list" id="not-urgent-not-important-list">
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="text/javascript" src="public/javascripts/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="public/javascripts/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="public/javascripts/underscore-min.js"></script>
+    <script type="text/javascript" src="public/javascripts/backbone-min.js"></script>
+    <script type="text/javascript" src="public/javascripts/backbone.localStorage-min.js"></script>
+    <script type="text/javascript" src="public/javascripts/app.js"></script>
+
+    <script type="text/template" id="task-view-template">
+      <div class="task-view">
+        <div class="pull-left"><input type="checkbox" <% if(selected) { %><%- 'checked=""' %><% } %>/></div>
+        <div class="task-name" title="<%- name %>"><%- name %></div>
+      </div>
+    </script>
+
+    <script type="text/template" id="task-list-view-template">
+
+    </script>
+
+    <script type="text/template" id="project-list-view-template">
+
+    </script>
+
+
+  </body>
+</html>

@@ -1,0 +1,109 @@
+body {
+  background-color: #E1E1E1;
+}
+
+hr .invisible {
+  visibility: hidden;
+}
+
+#main-content {
+  background-color: #E1E1E1;
+}
+
+.editable-field {
+  cursor: text;
+}
+
+.input-form-element {
+  border: none;
+  /* border-bottom: 2px solid #B8B8C9; */
+  padding: 4px;
+  border-radius: 3px;
+  min-width: 280px;
+  transition: all 120ms ease-out;
+}
+
+.task-box-area {
+  height: 100%;
+}
+
+.task-box-row {
+}
+
+.task-box {
+  background-color: #F8F8F9;
+  padding: 15px;
+  margin-bottom: 35px;
+  font-size: 1.5em;
+  height: 280px;
+  overflow: hidden;
+}
+
+.task-box:hover {
+  overflow: auto;
+}
+
+.task-box-title {
+  font-size: 1.8em;
+  font-weight: bold;
+  color: #CFCFBF;
+  background-color: #F8F8F9;
+  display: block;
+  width: 100%;
+  padding-left: 10px;
+  padding-right: 10px;
+  text-align: left;
+}
+
+#new-task-input-box {
+  background-color: #FFFFFF;
+  padding: 35px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px -2px rgba(0, 0, 0, 0.3);
+}
+
+#new-task-input-box input {
+  text-align: center;
+  border: 2px solid #DEDEDE;
+  color: #57534A;
+  font-weight: bold;
+}
+
+#new-task-input-box input:focus {
+  box-shadow: none;
+  border-color: #BFBFAF;
+  transition: all 120ms ease-out;
+}
+
+.task-view {
+  color: #57534A;
+  background-color: #FEFEFD;
+  height: 40px;
+  padding: 5px;
+  padding-left: 10px;
+  padding-right: 10px;
+  margin-top: 3px;
+  margin-bottom: 3px;
+  border: 1px solid #DEDEDE;
+  box-shadow: 0 1px 4px -2px rgba(0, 0, 0, 0.3);
+  cursor: move;
+}
+
+.task-view .task-name {
+  padding-left: 10px;
+  height: 40px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.task-list {
+  min-height: 80%;
+}
+
+.currently-dragged-element {
+  box-shadow: 0 15px 15px rgba(0, 0, 0, 0.3);
+  transition: box-shadow 120ms ease-out;
+}
