@@ -64,16 +64,25 @@ $(document).ready(function() {
     events: {
       'drop': 'drop',
     },
-    drop: function(e, index) {
-      // TODO
+    drop: function(e, options) {
+      var index = options['index'] || 0;
+      var newList = options['list'];
+      var oldList = self.app.taskLists[self.app.dragSourceTaskList];
+      // Remove the view from the old list.
+      oldList.model.remove(this.model);
+      // Add the view from the new list.
+      newList.model.add(this.model, {at: index});
     },
     template: function(data) {
       return _.template($('#' + self.names.taskViewTemplateId)
                         .html(), data.toJSON());
     },
-    render: function() {
+    render: function(element) {
       this.$el.html(this.template(this.model));
-      return this.$el.html();
+      if (element) {  // Be extra-cautious.
+        element.append(this.$el);
+      }
+      return this;
     },
   });
 
@@ -86,34 +95,43 @@ $(document).ready(function() {
       // Events
       this.listenTo(this.model, 'add', this.render);
     },
+    events: {
+
+    },
     template: function(data) {
       return _.template($('#' + self.names.taskListViewTemplateId)
                         .html(), data);
     },
     render: function() {
-      var html = '';
-      this.model.each(function(task) {
-        html += new self.TaskView({model: task}).render();
-      });
-      this.$el.html(html);
+      var that = this;
 
 
       // Append the the right container.
       var id = '';
-      if (this.name == 'urgent + important') {
+      if (this.name == self.names.urgentImportantListId) {
         id = self.names.urgentImportantListId;
-      } else if (this.name == 'urgent + not important') {
+      } else if (this.name == self.names.urgentNotImportantListId) {
         id = self.names.urgentNotImportantViewId;
-      } else if (this.name == 'not urgent + important') {
+      } else if (this.name == self.names.notUrgentImportantListId) {
         id = self.names.notUrgentImportantViewId;
-      } else if (this.name == 'not urgent + not important') {
+      } else if (this.name == self.names.notUrgentNotImportantListId) {
         id = self.names.notUrgentNotImportantListId;
       }
       var container = $('#' + id);
       container.empty();
-      container.append(this.$el.html());
+      // Do not append this element itself, but do append the subviews.
+      // So do NOT do this:
+      //
+      // container.append(this.$el.html());
 
-      return this.el;
+      this.model.each(function(task) {
+        // Append the subview HTML to this parent view by making the
+        // subview append itself when given a handle to the parent view
+        // element.
+        new self.TaskView({model: task}).render($('#' + id));
+      });
+
+      return this;
     },
     addTaskAtIndex: function(task, index) {
 
@@ -140,6 +158,7 @@ $(document).ready(function() {
     var that = this;
     that.currentView = null;
     that.dropTargetTaskList = null;
+    that.dragSourceTaskList = null;
 
     that.start = function() {
       // Initialize the project list view.
@@ -147,15 +166,15 @@ $(document).ready(function() {
 
       var testTastList = new self.TaskCollection([
         new self.Task({
-          name: 'Test task',
+          name: 'Red task',
           selected: false,
         }),
         new self.Task({
-          name: 'Another test task',
+          name: 'Green test task',
           selected: true,
         }),
         new self.Task({
-          name: 'Another test taks with a very long name',
+          name: 'Blue test taks with a very long name',
           selected: true,
         }),
       ]);
@@ -164,25 +183,25 @@ $(document).ready(function() {
 
       // `urgent + important'
       that.urgentImportantView = new self.TaskListView({
+        name: self.names.urgentImportantListId,
         model: testTastList,
-        name: 'urgent + important',
       });
       that.urgentImportantView.render();
       // `urgent + not important'
       that.urgentNotImportantView = new self.TaskListView({
-        name: 'urgent + not important',
+        name: self.names.urgentNotImportantListId,
         model: new self.TaskCollection([]),
       });
       that.urgentNotImportantView.render();
       // `not urgent + important'
       that.notUrgentImportantView = new self.TaskListView({
-        name: 'not urgent + important',
+        name: self.names.notUrgentImportantListId,
         model: new self.TaskCollection([]),
       });
       // `not urgent + not important'
       that.notUrgentImportantView.render();
       that.notUrgentNotImportantView = new self.TaskListView({
-        name: 'not urgent + not important',
+        name: self.names.notUrgentNotImportantListId,
         model: new self.TaskCollection([]),
       });
       that.notUrgentNotImportantView.render();
@@ -209,6 +228,12 @@ $(document).ready(function() {
           $(this).val('');
         }
       });
+
+      try {  // Do not accidentially restart the Backbone history.
+        Backbone.history.start();
+      } catch(error) {
+        // Ignore.
+      }
     };
 
     that.show = function(view) {
@@ -235,23 +260,29 @@ $(document).ready(function() {
     connectWith: '.task-list',
     start: function(e, ui) {
       ui.item.addClass(self.names.draggedElementClass);
-      // console.log($(this).attr('id'));  // DEBUG
       var id = $(this).attr('id');
-      // self.app.taskLists[id]
-      console.log(self.app.taskLists[id].model);  // DEBUG
+      self.app.dragSourceTaskList = id;
     },
     stop: function(e, ui) {
       ui.item.removeClass(self.names.draggedElementClass);
+      var id = $(this).attr('id');
+      var index = ui.item.index();
+      var list = null;
+      var elm = null;
       // If the drop target is the source element itself:
       if (self.app.dropTargetTaskList == null) {
-
+        elm = self.app.dragSourceTaskList;
       } else {
-
+        elm = self.app.dropTargetTaskList;
       }
-      // console.log(ui.item.index());  // DEBUG
-      // console.log(ui.item);  // DEBUG
+      list = self.app.taskLists[elm];
+
+      // Drop the element.
+      ui.item.trigger('drop', {list: list, index: index});
+
       // Reset the drop target.
       self.app.dropTargetTaskList = null;
+      self.app.dragSourceTaskList = null;
     },
     receive: function(e, ui) {
       self.app.dropTargetTaskList = $(this).attr('id');

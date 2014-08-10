@@ -75,10 +75,8 @@
     <script type="text/javascript" src="public/javascripts/app.js"></script>
 
     <script type="text/template" id="task-view-template">
-      <div class="task-view">
-        <div class="pull-left"><input type="checkbox" <% if(selected) { %><%- 'checked=""' %><% } %>/></div>
-        <div class="task-name" title="<%- name %>"><%- name %></div>
-      </div>
+      <div class="pull-left"><input type="checkbox" <% if(selected) { %><%- 'checked=""' %><% } %>/></div>
+      <div class="task-name" title="<%- name %>"><%- name %></div>
     </script>
 
     <script type="text/template" id="task-list-view-template">
