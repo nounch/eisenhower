@@ -13,6 +13,7 @@ $(document).ready(function() {
     taskViewClass: 'task-view',
     taskListViewClass: 'task-list-view',
     projectListViewId: 'project-list-view',
+    taskSelectionToggleClass: 'task-selection-toggle',
 
     urgentImportantListId: 'urgent-important-list',
     urgentNotImportantListId: 'urgent-not-important-list',
@@ -20,6 +21,9 @@ $(document).ready(function() {
     notUrgentNotImportantListId: 'not-urgent-not-important-list',
 
     draggedElementClass: 'currently-dragged-element',
+
+    removeTaskButtonClass: 'remove-task-button',
+    removeSelectedButtonClass: 'remove-selected-button',
   }
 
 
@@ -61,6 +65,16 @@ $(document).ready(function() {
   self.TaskView = Backbone.View.extend({
     tagName: 'div',
     className: self.names.taskViewClass,
+    initialize: function(options) {
+      // The element to which the view should be appended.
+      this.element = options['element'];
+
+      // Bind events.
+      this.events['click .' + self.names.removeTaskButtonClass] =
+        'removeThisTask';
+      this.events['click .' + self.names.taskSelectionToggleClass] =
+        'toggleSelected';
+    },
     events: {
       'drop': 'drop',
     },
@@ -73,14 +87,30 @@ $(document).ready(function() {
       // Add the view from the new list.
       newList.model.add(this.model, {at: index});
     },
+    removeThisTask: function() {
+      var that = this;
+      // Animate the element.
+      this.$el.animate({
+        'opacity': '0.001',
+      }, 'fast', function() {
+        that.$el.slideUp(function() {
+          // Actually remove the element.
+          that.$el.remove();
+        });
+      });
+      self.app.trigger('remove:task', this.model.cid);
+    },
+    toggleSelected: function() {
+      this.model.set({selected: !this.model.get('selected')})
+    },
     template: function(data) {
       return _.template($('#' + self.names.taskViewTemplateId)
                         .html(), data.toJSON());
     },
-    render: function(element) {
+    render: function() {
       this.$el.html(this.template(this.model));
-      if (element) {  // Be extra-cautious.
-        element.append(this.$el);
+      if (this.element) {  // Be extra-cautious.
+        this.element.append(this.$el);
       }
       return this;
     },
@@ -111,9 +141,9 @@ $(document).ready(function() {
       if (this.name == self.names.urgentImportantListId) {
         id = self.names.urgentImportantListId;
       } else if (this.name == self.names.urgentNotImportantListId) {
-        id = self.names.urgentNotImportantViewId;
+        id = self.names.urgentNotImportantListId;
       } else if (this.name == self.names.notUrgentImportantListId) {
-        id = self.names.notUrgentImportantViewId;
+        id = self.names.notUrgentImportantListId;
       } else if (this.name == self.names.notUrgentNotImportantListId) {
         id = self.names.notUrgentNotImportantListId;
       }
@@ -128,7 +158,7 @@ $(document).ready(function() {
         // Append the subview HTML to this parent view by making the
         // subview append itself when given a handle to the parent view
         // element.
-        new self.TaskView({model: task}).render($('#' + id));
+        new self.TaskView({model: task, element: $('#' + id)}).render();
       });
 
       return this;
@@ -161,6 +191,12 @@ $(document).ready(function() {
     that.dragSourceTaskList = null;
 
     that.start = function() {
+      // Allow the app itself to trigger and listen to events.
+      _.extend(that, Backbone.Events);
+
+      // Bind event listeners.
+      that.on('remove:task', that.removeTask);
+
       // Initialize the project list view.
       that.projectListView = new self.ProjectListView({});
 
@@ -177,6 +213,32 @@ $(document).ready(function() {
           name: 'Blue test taks with a very long name',
           selected: true,
         }),
+
+        new self.Task({
+          name: 'Blue test taks with a very long name',
+          selected: true,
+        }),
+        new self.Task({
+          name: 'Blue test taks with a very long name',
+          selected: false,
+        }),
+        new self.Task({
+          name: 'Blue test taks with a very long name',
+          selected: true,
+        }),
+        new self.Task({
+          name: 'Blue test taks with a very long name',
+          selected: false,
+        }),
+        new self.Task({
+          name: 'Blue test taks with a very long name',
+          selected: true,
+        }),
+        new self.Task({
+          name: 'Blue test taks with a very long name',
+          selected: false,
+        }),
+
       ]);
 
       // Initialize the task list views.
@@ -221,10 +283,13 @@ $(document).ready(function() {
       $('#' + self.names.newTaskInputId).keypress(function(e) {
         if (e.which == 13) {
           e.preventDefault();
-          var newModel = new self.Task({
-            name: $(this).val(),
-          });
-          that.urgentImportantView.model.unshift(newModel);
+          var value = $(this).val();
+          if (!/^\s*$/.test(value)) {  // Discard empty strings.
+            var newModel = new self.Task({
+              name: value,
+            });
+            that.urgentImportantView.model.unshift(newModel);
+          }
           $(this).val('');
         }
       });
@@ -234,6 +299,29 @@ $(document).ready(function() {
       } catch(error) {
         // Ignore.
       }
+    };
+
+    that.removeTask = function(cid) {
+      var keys = Object.keys(that.taskLists);
+      _.each(keys, function(key) {
+        that.taskLists[key].model.remove(cid);
+      });
+    };
+
+    that.removeSelectedTasks = function() {
+      var keys = Object.keys(that.taskLists);
+      _.each(keys, function(key) {
+        var removables = [];
+        that.taskLists[key].model.each(function(task) {
+          if (task.get('selected')) {
+            removables.push(task);
+          }
+        });
+        // Remove all tasks in one flush so nothing is blocked.
+        that.taskLists[key].model.remove(removables);
+        that.taskLists[key].render();
+      });
+
     };
 
     that.show = function(view) {
@@ -288,5 +376,15 @@ $(document).ready(function() {
       self.app.dropTargetTaskList = $(this).attr('id');
     },
   }).disableSelection();
+
+
+  //=======================================================================
+  // Buttons etc.
+  //=======================================================================
+
+  $('.' + self.names.removeSelectedButtonClass).click(function(e) {
+    e.preventDefault();
+    self.app.removeSelectedTasks();
+  });
 
 });

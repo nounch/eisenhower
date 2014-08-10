@@ -97,6 +97,7 @@ hr .invisible {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  width: 300px;
 }
 
 .task-list {
@@ -106,4 +107,32 @@ hr .invisible {
 .currently-dragged-element {
   box-shadow: 0 15px 15px rgba(0, 0, 60, 0.3);
   transition: box-shadow 120ms ease-out;
+}
+
+.remove-task-button-wrapper {
+  background-color: #DEDEDE;
+  color: #FEFEFD;
+  border-radius: 50%;
+  height: 25px;
+  width: 25px;
+  transition: background-color 160ms ease-out;
+  margin-top: -37px;
+}
+.remove-task-button-wrapper:hover {
+  background-color: #CDCDCD;
+  transition: background-color 160ms ease-out;
+}
+
+.remove-task-button {
+  background: none;
+  color: #FEFEFD;
+  border: none;
+  border-radius: 50%;
+  font-size: 25px;
+  font-weight: bold;
+  display: table-cell;
+  text-align: center;
+  vertical-align: middle;
+  margin-top: -13px;
+  margin-left: -0.5px;
 }

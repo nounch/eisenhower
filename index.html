@@ -17,6 +17,7 @@
           <div class="row">
             <div id="new-task-input-box" class="col col-md-4 col-md-offset-4">
               <input type="text" id="new-task-input" class="form-control" value="" placeholder="Add a new task"/>
+	      <button type="button" class="btn btn-link btn-xs pull-right remove-selected-button">&times; Remove selected</button>
             </div>
           </div>
 
@@ -75,8 +76,9 @@
     <script type="text/javascript" src="public/javascripts/app.js"></script>
 
     <script type="text/template" id="task-view-template">
-      <div class="pull-left"><input type="checkbox" <% if(selected) { %><%- 'checked=""' %><% } %>/></div>
+      <div class="pull-left task-selection-toggle"><input type="checkbox" <% if(selected) { %><%- 'checked=""' %><% } %>/></div>
       <div class="task-name" title="<%- name %>"><%- name %></div>
+      <div class="pull-right remove-task-button-wrapper"><button type="button" class="remove-task-button">&times;</button></div>
     </script>
 
     <script type="text/template" id="task-list-view-template">
