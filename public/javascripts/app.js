@@ -2,17 +2,26 @@ $(document).ready(function() {
 
   var self = this;
 
+  // Make views removable
+  Backbone.View.prototype.close = function() {
+    this.remove();
+    this.unbind();
+  };
+
   self.names = {
     mainContentId: 'main-content',
     newTaskInputId: 'new-task-input',
 
     taskViewTemplateId: 'task-view-template',
     taskListViewTemplateId: 'task-list-view-template',
-    projectListViewTemplateId: 'project-list-view-template',
+    projectListItemTemplateId: 'project-list-item-template',
 
     taskViewClass: 'task-view',
     taskListViewClass: 'task-list-view',
     projectListViewId: 'project-list-view',
+    projectListViewAnchorId: 'projects-list-anchor',
+    projectListItemClass: 'project-list-item',
+    addProjectInputId: 'add-project-input',
     taskSelectionToggleClass: 'task-selection-toggle',
 
     urgentImportantListId: 'urgent-important-list',
@@ -28,7 +37,7 @@ $(document).ready(function() {
 
 
   //=======================================================================
-  // Models
+  // Models + Collections
   //=======================================================================
 
   self.Task = Backbone.Model.extend({
@@ -38,20 +47,23 @@ $(document).ready(function() {
     },
   });
 
-  self.Project = Backbone.Model.extend({
-    defaults: {
-      name: ''
-    },
-  });
-
-
-  //=======================================================================
-  // Colllections
-  //=======================================================================
+  // Collection
 
   self.TaskCollection = Backbone.Collection.extend({
     model: self.Task,
   });
+
+  self.Project = Backbone.Model.extend({
+    defaults: {
+      name: '',
+      urgentImportantTaskList: new self.TaskCollection([]),
+      urgentNotImportantTaskList: new self.TaskCollection([]),
+      notUrgentImportantTaskList: new self.TaskCollection([]),
+      notUrgentNotImportantTaskList: new self.TaskCollection([]),
+    },
+  });
+
+  // Collection
 
   self.ProjectList = Backbone.Collection.extend({
     model: self.Project,
@@ -168,15 +180,35 @@ $(document).ready(function() {
     },
   });
 
+  self.ProjectView = Backbone.View.extend({
+    tagName: 'div',
+    className: self.names.projectListItemClass,
+    events: {
+      'click': 'showThisProject',
+    },
+    showThisProject: function(e) {
+      e.preventDefault();
+      self.app.showProject(this.model);
+    },
+    template: function(data) {
+      return _.template($('#' + self.names.projectListItemTemplateId)
+                        .html(), {project: data.toJSON()});
+    },
+    render: function() {
+      this.$el.html(this.template(this.model));
+      return this.$el;
+    },
+  });
+
   self.ProjectListView = Backbone.View.extend({
     tagName: 'div',
     id: self.names.projectListViewId,
-    template: function() {
-      return _.template($('#' + self.names.projectListViewTemplateId)
-                        .html(), data);
-    },
     render: function() {
-      this.$el.html(this.template(this.model.attributes));
+      $('#' + self.names.projectListViewAnchorId).empty();
+      _.each(this.model.models, function(project) {
+        $('#' + self.names.projectListViewAnchorId)
+          .append(new self.ProjectView({model: project}).render());
+      });
     },
   });
 
@@ -187,6 +219,7 @@ $(document).ready(function() {
   self.App = function() {
     var that = this;
     that.currentView = null;
+    that.currentProject = null;
     that.dropTargetTaskList = null;
     that.dragSourceTaskList = null;
 
@@ -243,41 +276,36 @@ $(document).ready(function() {
 
       // Initialize the task list views.
 
-      // `urgent + important'
-      that.urgentImportantView = new self.TaskListView({
-        name: self.names.urgentImportantListId,
-        model: testTastList,
-      });
-      that.urgentImportantView.render();
-      // `urgent + not important'
-      that.urgentNotImportantView = new self.TaskListView({
-        name: self.names.urgentNotImportantListId,
-        model: new self.TaskCollection([]),
-      });
-      that.urgentNotImportantView.render();
-      // `not urgent + important'
-      that.notUrgentImportantView = new self.TaskListView({
-        name: self.names.notUrgentImportantListId,
-        model: new self.TaskCollection([]),
-      });
-      // `not urgent + not important'
-      that.notUrgentImportantView.render();
-      that.notUrgentNotImportantView = new self.TaskListView({
-        name: self.names.notUrgentNotImportantListId,
-        model: new self.TaskCollection([]),
-      });
-      that.notUrgentNotImportantView.render();
-
       // Make the indvidual lists easily referencable.
       that.taskLists = {};
+      // `urgent + important'
       that.taskLists[self.names.urgentImportantListId] =
-        that.urgentImportantView;
+        new self.TaskListView({
+          name: self.names.urgentImportantListId,
+          model: testTastList,
+        });
+      that.taskLists[self.names.urgentImportantListId].render();
+      // `urgent + not important'
       that.taskLists[self.names.urgentNotImportantListId] =
-        that.urgentNotImportantView;
+        new self.TaskListView({
+          name: self.names.urgentNotImportantListId,
+          model: new self.TaskCollection([]),
+        });
+      that.taskLists[self.names.urgentNotImportantListId].render();
+      // `not urgent + important'
       that.taskLists[self.names.notUrgentImportantListId] =
-        that.notUrgentImportantView;
+        new self.TaskListView({
+          name: self.names.notUrgentImportantListId,
+          model: new self.TaskCollection([]),
+        });
+      // `not urgent + not important'
+      that.taskLists[self.names.notUrgentImportantListId].render();
       that.taskLists[self.names.notUrgentNotImportantListId] =
-        that.notUrgentNotImportantView;
+        new self.TaskListView({
+          name: self.names.notUrgentNotImportantListId,
+          model: new self.TaskCollection([]),
+        });
+      that.taskLists[self.names.notUrgentNotImportantListId].render();
 
       // Make the input field generate new models.
       $('#' + self.names.newTaskInputId).keypress(function(e) {
@@ -288,10 +316,30 @@ $(document).ready(function() {
             var newModel = new self.Task({
               name: value,
             });
-            that.urgentImportantView.model.unshift(newModel);
+            that.taskLists[self.names.urgentImportantListId].model
+              .unshift(newModel);
           }
           $(this).val('');
         }
+      });
+
+      // Make the project list input field generate a new project.
+      $('#' + self.names.addProjectInputId).keypress(function(e) {
+        if (e.which == 13) {
+          e.preventDefault();
+          var value = $(this).val();
+          if (!/^\s*$/.test(value)) {  // Discard empty strings.
+            var newProject = new self.Project({
+              name: value,
+            });
+            self.app.projectListView.model.unshift(newProject);
+            self.app.projectListView.render();
+          }
+          $(this).val('');
+        }
+        $(this).blur(function() {
+          $(this).val('');
+        });
       });
 
       try {  // Do not accidentially restart the Backbone history.
@@ -299,6 +347,29 @@ $(document).ready(function() {
       } catch(error) {
         // Ignore.
       }
+
+      // Projects
+
+      var testProjects = new self.ProjectList([
+        new self.Project({
+          name: 'Test project'
+        }),
+        new self.Project({
+          name: 'Another test project'
+        }),
+        new self.Project({
+          name: 'Mega project'
+        }),
+        new self.Project({
+          name: 'A project with a very long name just for testin purposes'
+        }),
+        new self.Project({
+          name: 'Super thing'
+        }),
+      ]);
+      that.projectListView =
+        new self.ProjectListView({model: testProjects});
+      that.projectListView.render();
     };
 
     that.removeTask = function(cid) {
@@ -333,6 +404,46 @@ $(document).ready(function() {
       that.currentView.render();
 
       $('#' + self.names.mainContentId).html(that.currentView.el);
+    };
+
+    that.showProject = function(project) {
+      // if (that.currentProject) {
+      // Remove the old views.
+      that.taskLists[self.names.urgentImportantListId].close();
+      that.taskLists[self.names.urgentNotImportantListId].close();
+      that.taskLists[self.names.notUrgentImportantListId].close();
+      that.taskLists[self.names.notUrgentNotImportantListId].close();
+      // }
+
+      // Add the new views.
+      that.taskLists[self.names.urgentImportantListId] =
+        new self.TaskListView({
+          name: self.names.urgentImportantListId,
+          model: project.attributes.urgentImportantTaskList,
+        });
+      that.taskLists[self.names.urgentNotImportantListId] =
+        new self.TaskListView({
+          name: self.names.urgentNotImportantListId,
+          model: project.attributes.urgentNotImportantTaskList,
+        });
+      that.taskLists[self.names.notUrgentImportantListId] =
+        new self.TaskListView({
+          name: self.names.notUrgentImportantListId,
+          model: project.attributes.notUrgentImportantTaskList,
+        });
+      that.taskLists[self.names.notUrgentNotImportantListId] =
+        new self.TaskListView({
+          name: self.names.notUrgentNotImportantListId,
+          model: project.attributes.notUrgentNotImportantTaskList,
+        });
+
+      // Render the new views
+      var keys = Object.keys(that.taskLists);
+      _.each(keys, function(key) {
+        that.taskLists[key].render();
+      });
+
+      console.log(JSON.stringify(self.app.taskLists));  // DEBUG
     };
   };
 

@@ -109,30 +109,84 @@ hr .invisible {
   transition: box-shadow 120ms ease-out;
 }
 
-.remove-task-button-wrapper {
-  background-color: #DEDEDE;
-  color: #FEFEFD;
-  border-radius: 50%;
-  height: 25px;
-  width: 25px;
-  transition: background-color 160ms ease-out;
-  margin-top: -37px;
-}
-.remove-task-button-wrapper:hover {
-  background-color: #CDCDCD;
-  transition: background-color 160ms ease-out;
-}
-
 .remove-task-button {
   background: none;
-  color: #FEFEFD;
+  color: #CDCDCD;
   border: none;
   border-radius: 50%;
   font-size: 25px;
   font-weight: bold;
-  display: table-cell;
   text-align: center;
-  vertical-align: middle;
-  margin-top: -13px;
-  margin-left: -0.5px;
+  margin-top: -45px;
+  margin-right: -5px;
+}
+
+.remove-task-button:hover {
+  color: #AF1212;
+}
+
+.project-list-item a {
+  color: #919191;
+  font-size: 1.1em;
+  font-style: italic;
+  padding-top: 15px;
+  padding-bottom: 15px;
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: 50px;
+  text-shadow: 1px 1px 0 #F1F1FE;
+  border-radius: 0;
+  width: 100%;
+  text-align: left;
+  transition: all 60ms ease-out;
+  border: none;
+}
+
+.project-list-item a:hover {
+  color: #57534A;
+  font-weight: bold;
+  border-left: 5px solid #57534A;
+  padding-left: 30px;
+  transition: all 120ms ease-out;
+}
+
+#add-project-input {
+  background-color: rgba(255, 255, 255, 0.0);
+  border: none;
+  color: #919191;
+  width: 100%;
+  text-align: center;
+  cursor: pointer;
+  border: 3px solid rgba(255, 255, 255, 0.0);
+  border-bottom: 3px solid #CDCDCD;
+  transition: all 260ms ease-out;
+  padding: 5px;
+}
+
+#add-project-input:hover {
+  color: #57534A;
+  transition: all 260ms ease-out;
+}
+
+#add-project-input:focus {
+  border-color: #BFBFAF;
+  opacity: 1.0;
+  border-radius: 6px;
+  background-color: #F1F1FE;
+  cursor: text;
+  opacity: 1.0;
+  border-color: #BFBFAF;
+  color: #57534A;
+  transition: all 260ms ease-out;
+}
+
+#project-list-view {
+  max-height: 400px;
+  overflow: hidden;
+}
+
+#project-list-view:hover {
+  overflow-y: auto;
 }
