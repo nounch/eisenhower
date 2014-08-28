@@ -33,6 +33,12 @@ $(document).ready(function() {
 
     removeTaskButtonClass: 'remove-task-button',
     removeSelectedButtonClass: 'remove-selected-button',
+
+    removeCurrentProjectButtonClass: 'remove-current-project-button',
+    currentProjectClass: 'current-project',
+    projectListItemDataAttributeId: 'data-project-id',
+
+    invisible: 'invisible',
   }
 
 
@@ -137,16 +143,12 @@ $(document).ready(function() {
       // Events
       this.listenTo(this.model, 'add', this.render);
     },
-    events: {
-
-    },
     template: function(data) {
       return _.template($('#' + self.names.taskListViewTemplateId)
                         .html(), data);
     },
     render: function() {
       var that = this;
-
 
       // Append the the right container.
       var id = '';
@@ -189,14 +191,40 @@ $(document).ready(function() {
     showThisProject: function(e) {
       e.preventDefault();
       self.app.showProject(this.model);
+      // Set the current project.
+      self.app.setCurrentProject(this.model);
+      this.highlight();
+    },
+    highlight: function() {
+      // Unhighlight all other projects. Highlight the current project in
+      // the project list.
+      $('.' + self.names.projectListItemClass)
+        .removeClass(self.names.currentProjectClass);
+      this.$el.addClass(self.names.currentProjectClass);
     },
     template: function(data) {
+      // Explicitely add the `cid'. Otherwise, Backbone's `toJSON' would
+      // strip it away.
+      data.attributes['cid'] = data.cid;
       return _.template($('#' + self.names.projectListItemTemplateId)
                         .html(), {project: data.toJSON()});
     },
     render: function() {
       this.$el.html(this.template(this.model));
       return this.$el;
+    },
+    remove: function() {
+      var that = this;
+      that.$el.slideUp(function() {
+        // Remove the model.
+        self.app.projectListView.model.remove(that.model.cid)
+        // Remove the element itself.
+        that.$el.remove();
+        // Show and highlightthe first project in the project list. This is
+        // necessary if the element that is removed is itself the first
+        // element in the project list.
+        self.app.showProject(self.app.projectListView.model.models[0]);
+      });
     },
   });
 
@@ -329,13 +357,41 @@ $(document).ready(function() {
           e.preventDefault();
           var value = $(this).val();
           if (!/^\s*$/.test(value)) {  // Discard empty strings.
+            // Make the `Remove current project' button invisible.
+            if (self.app.projectListView.model.length >= 0) {
+              $('.' + self.names.removeCurrentProjectButtonClass)
+                .removeClass(self.names.invisible);
+            }
+
             var newProject = new self.Project({
               name: value,
+              urgentImportantTaskList: new self.TaskListView({
+                name: self.names.urgentImportantListId,
+                model: new self.TaskCollection([]),
+              }).model,
+              urgentNotImportantTaskList: new self.TaskListView({
+                name: self.names.urgentNotImportantListId,
+                model: new self.TaskCollection([]),
+              }).model,
+              notUrgentImportantTaskList: new self.TaskListView({
+                name: self.names.notUrgentImportantListId,
+                model: new self.TaskCollection([]),
+              }).model,
+              notUrgentNotImportantTaskList: new self.TaskListView({
+                name: self.names.notUrgentNotImportantListId,
+                model: new self.TaskCollection([]),
+              }).model,
             });
             self.app.projectListView.model.unshift(newProject);
             self.app.projectListView.render();
           }
           $(this).val('');
+
+          // Set the current project.
+          self.app.setCurrentProject(newProject);
+
+          // Show and highlight the first project in the project list.
+          self.app.showProject(self.app.projectListView.model.models[0]);
         }
         $(this).blur(function() {
           $(this).val('');
@@ -352,10 +408,34 @@ $(document).ready(function() {
 
       var testProjects = new self.ProjectList([
         new self.Project({
-          name: 'Test project'
+          name: 'Test project',
+          urgentImportantTaskList: that.taskLists[
+            self.names.urgentImportantListId].model,
+          urgentNotImportantTaskList: that.taskLists[
+            self.names.urgentNotImportantListId].model,
+          notUrgentImportantTaskList: that.taskLists[
+            self.names.notUrgentImportantListId].model,
+          notUrgentNotImportantTaskList: that.taskLists[
+            self.names.notUrgentNotImportantListId].model,
         }),
         new self.Project({
-          name: 'Another test project'
+          name: 'Another test project',
+          urgentImportantTaskList: new self.TaskListView({
+            name: self.names.urgentImportantListId,
+            model: new self.TaskCollection([]),
+          }).model,
+          urgentNotImportantTaskList: new self.TaskListView({
+            name: self.names.urgentNotImportantListId,
+            model: new self.TaskCollection([]),
+          }).model,
+          notUrgentImportantTaskList: new self.TaskListView({
+            name: self.names.notUrgentImportantListId,
+            model: new self.TaskCollection([]),
+          }).model,
+          notUrgentNotImportantTaskList: new self.TaskListView({
+            name: self.names.notUrgentNotImportantListId,
+            model: new self.TaskCollection([]),
+          }).model,
         }),
         new self.Project({
           name: 'Mega project'
@@ -407,13 +487,14 @@ $(document).ready(function() {
     };
 
     that.showProject = function(project) {
-      // if (that.currentProject) {
-      // Remove the old views.
-      that.taskLists[self.names.urgentImportantListId].close();
-      that.taskLists[self.names.urgentNotImportantListId].close();
-      that.taskLists[self.names.notUrgentImportantListId].close();
-      that.taskLists[self.names.notUrgentNotImportantListId].close();
-      // }
+      try {
+	that.taskLists[self.names.urgentImportantListId] = null;
+	that.taskLists[self.names.urgentNotImportantListId] = null;
+	that.taskLists[self.names.notUrgentImportantListId] = null;
+	that.taskLists[self.names.notUrgentNotImportantListId] = null;
+      } catch(error) {
+	// Ignore it.
+      }
 
       // Add the new views.
       that.taskLists[self.names.urgentImportantListId] =
@@ -443,13 +524,58 @@ $(document).ready(function() {
         that.taskLists[key].render();
       });
 
-      console.log(JSON.stringify(self.app.taskLists));  // DEBUG
+      // Set the current project.
+      self.app.setCurrentProject(project);
+
+      // Highlight the project in the project list.
+      self.app.highlightFirstProject();
+    };
+
+    that.removeCurrentProject = function() {
+      $('.' + self.names.projectListItemClass).each(function() {
+        if ($(this).attr(self.names.projectListItemDataAttributeId) ==
+            self.app.currentProject.cid) {
+          $(this).slideUp(function() {
+            // `setTimeout' compensates for jQuery's `slideUp' being too
+            // eager. Also, it feels more intuitive to have a short delay.
+            setTimeout(function() {
+              try {  // Only remove, if there are any projects.
+                // Make the `Remove current project' button invisible.
+                if (that.projectListView.model.length <= 1) {
+                  $('.' + self.names.removeCurrentProjectButtonClass)
+                    .addClass(self.names.invisible);
+                }
+
+                // Actually remove the model (The rest is just for
+                // animation).
+                that.projectListView.model.remove(that.currentProject.cid);
+                that.projectListView.render();
+                that.showProject(that.projectListView.model.models[0]);
+              } catch(error) {
+                // Ignore it.
+              }
+            }, 160);
+          });
+        }
+      });
+    };
+
+    that.setCurrentProject = function(project) {
+      that.currentProject = project;
+    };
+
+    that.highlightFirstProject = function() {
+      $('.' + self.names.projectListItemClass + ':first')
+        .addClass(self.names.currentProjectClass);
     };
   };
 
   self.app = new self.App();
   self.app.start();
 
+  // Show and highlight the first project in the project list.
+  self.app.setCurrentProject(self.app.projectListView.model.models[0]);
+  self.app.highlightFirstProject();
 
   //=======================================================================
   // Drag & Drop
@@ -496,6 +622,11 @@ $(document).ready(function() {
   $('.' + self.names.removeSelectedButtonClass).click(function(e) {
     e.preventDefault();
     self.app.removeSelectedTasks();
+  });
+
+  $('.' + self.names.removeCurrentProjectButtonClass).click(function(e) {
+    e.preventDefault();
+    self.app.removeCurrentProject();
   });
 
 });

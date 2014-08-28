@@ -145,11 +145,21 @@ hr .invisible {
 }
 
 .project-list-item a:hover {
+  color: #919191;
+  font-weight: bold;
+  border-left: 5px solid #919191;
+  padding-left: 30px;
+  transition: all 120ms ease-out;
+}
+
+.current-project a,
+.current-project a:focus {
   color: #57534A;
   font-weight: bold;
   border-left: 5px solid #57534A;
   padding-left: 30px;
   transition: all 120ms ease-out;
+  outline: none;
 }
 
 #add-project-input {
@@ -163,6 +173,7 @@ hr .invisible {
   border-bottom: 3px solid #CDCDCD;
   transition: all 260ms ease-out;
   padding: 5px;
+  margin-bottom: 5px;
 }
 
 #add-project-input:hover {
@@ -182,11 +193,11 @@ hr .invisible {
   transition: all 260ms ease-out;
 }
 
-#project-list-view {
+.project-list-view {
   max-height: 400px;
   overflow: hidden;
 }
 
-#project-list-view:hover {
+.project-list-view:hover {
   overflow-y: auto;
 }

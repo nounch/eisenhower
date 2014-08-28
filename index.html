@@ -17,14 +17,15 @@
           <div class="row">
             <div id="new-task-input-box" class="col col-md-4 col-md-offset-4">
               <input type="text" id="new-task-input" class="form-control" value="" placeholder="Add a new task"/>
-              <button type="button" class="btn btn-link btn-xs pull-right remove-selected-button">&times; Remove selected</button>
+              <button type="button" class="btn btn-link btn-xs pull-right remove-selected-button" title="Remove all selected tasks">&times; Remove selected</button>
+              <button type="button" class="btn btn-link remove-current-project-button">Remove current project</button>
             </div>
           </div>
 
           <div class="row">
             <ul class="col col-md-3">
               <input type="" id="add-project-input" value="" placeholder="Add a new project" />
-              <div id="projects-list-anchor">
+              <div id="projects-list-anchor" class="project-list-view">
 
               </div>
             </ul>
@@ -87,7 +88,7 @@
     </script>
 
     <script type="text/template" id="project-list-item-template">
-      <a href="#" class="btn" data-project-id="<%- JSON.stringify(project) %>"><%- project.name %></a>
+      <a href="#" class="btn project-list-item" title="<%- project.name %>" data-project-id="<%- project.cid %>"><%- project.name %></a>
     </script>
 
 
