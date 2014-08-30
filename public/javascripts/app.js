@@ -17,6 +17,7 @@ $(document).ready(function() {
     projectListItemTemplateId: 'project-list-item-template',
 
     taskViewClass: 'task-view',
+    taskViewDataAttributeTaskId: 'data-task-id',
     taskListViewClass: 'task-list-view',
     projectListViewId: 'project-list-view',
     projectListViewAnchorId: 'projects-list-anchor',
@@ -40,6 +41,87 @@ $(document).ready(function() {
 
     invisible: 'invisible',
   }
+
+
+  // Make a project droppable.
+  self.originalDroppableBackgroundColor = null;
+  self.makeProjectDroppable = function(project) {
+    $(project.$el).droppable({
+      drop: function(event, ui) {
+        $(this).css({
+          'background-color': self.originalDroppableBackgroundColor,
+        });
+        var projectCid = $(this).find('a').attr(
+          self.names.projectListItemDataAttributeId);
+        var taskCid = $(ui.draggable).attr(
+          self.names.taskViewDataAttributeTaskId)
+
+        // Do nothing, if the target is the current project.
+        if (projectCid != self.app.currentProject.cid) {
+          var movedTask = null;
+
+          // Search all taks lists and remove the task from its current one.
+          // (Not important here, but for huge lists this could potentially
+          // be faster than speculatively calling Backbone's `remove' on all
+          // of them. Not verified! In any case, it allows for additional or
+          // less task lists in the future.).
+          var keys = Object.keys(self.app.taskLists);
+          _.each(keys, function(key) {
+            var taskList = self.app.taskLists[key];
+            taskList.model.each(function(task) {
+              if (task.cid == taskCid) {
+                movedTask = task;
+                taskList.model.remove(taskCid);
+              }
+            });
+          });
+
+          // Remove the DOM element. This is more efficient than
+          // rerendering the whole current project.
+          $(ui.draggable).remove();
+
+          // Add the task to its new project (target project).
+          var targetProject = self.app.projectListView.model
+            .findWhere({cid: projectCid});
+
+          self.app.norender = true;
+          targetProject.attributes.urgentImportantTaskList
+            .unshift(movedTask);
+          self.app.norender = false;
+        }
+
+      },
+      over: function(event, ui) {
+        // This timeout is coordinated with the `out' timeout and prevents
+        // the dragged elemnt to accidentially have the wront styleing when
+        // moving the cursor too fast.
+        setTimeout(function() {
+          $(ui.draggable).css({
+            'opacity': '0.25',
+          });
+        }, 20);
+        self.originalDroppableBackgroundColor = $(this)
+          .css('background-color');
+        $(this).css({
+          'background-color': '#CDCDCD',
+        });
+      },
+      out: function(event, ui) {
+        // This timeout is coordinated with the `over' timeout and prevents
+        // the dragged elemnt to accidentially have the wront styleing when
+        // moving the cursor too fast.
+        setTimeout(function() {
+          $(ui.draggable).css({
+            'opacity': '1.0',
+          });
+        }, 10);
+
+        $(this).css({
+          'background-color': self.originalDroppableBackgroundColor,
+        });
+      },
+    });
+  };
 
 
   //=======================================================================
@@ -92,6 +174,8 @@ $(document).ready(function() {
         'removeThisTask';
       this.events['click .' + self.names.taskSelectionToggleClass] =
         'toggleSelected';
+
+      this.$el.attr(self.names.taskViewDataAttributeTaskId, this.model.cid);
     },
     events: {
       'drop': 'drop',
@@ -138,10 +222,17 @@ $(document).ready(function() {
     tagName: 'div',
     className: self.names.taskListViewClass,
     initialize: function(options) {
+      var that = this;
       this.name = options['name'];
 
       // Events
-      this.listenTo(this.model, 'add', this.render);
+      this.listenTo(this.model, 'add', function(e) {
+        // Only render if this should be rendered (i.e. if the list is part
+        // of the current project).
+        if (!self.app.norender) {
+          this.render();
+        }
+      });
     },
     template: function(data) {
       return _.template($('#' + self.names.taskListViewTemplateId)
@@ -187,6 +278,9 @@ $(document).ready(function() {
     className: self.names.projectListItemClass,
     events: {
       'click': 'showThisProject',
+    },
+    initialize: function() {
+      self.makeProjectDroppable(this);
     },
     showThisProject: function(e) {
       e.preventDefault();
@@ -240,6 +334,7 @@ $(document).ready(function() {
     },
   });
 
+
   //=======================================================================
   // App
   //=======================================================================
@@ -250,6 +345,14 @@ $(document).ready(function() {
     that.currentProject = null;
     that.dropTargetTaskList = null;
     that.dragSourceTaskList = null;
+    // This is a quasi-global (!) variable that tells functions that are
+    // bound to triggers (i.e. `add') that the corresponding DOM element
+    // should not be (re-)rendered. Example: Dropping a task onto a project
+    // name in the projects list should still render the current project,
+    // not the project associated with the drop target. This compensates
+    // for Backbone's lack of a mechanism to selectively cancel functions
+    // associated with triggers.
+    that.norender = false;
 
     that.start = function() {
       // Allow the app itself to trigger and listen to events.
@@ -438,13 +541,13 @@ $(document).ready(function() {
           }).model,
         }),
         new self.Project({
-          name: 'Mega project'
+          name: '!!! Mega project'
         }),
         new self.Project({
-          name: 'A project with a very long name just for testin purposes'
+          name: '!!! A project with a very long name just for testin purposes'
         }),
         new self.Project({
-          name: 'Super thing'
+          name: '!!! Super thing'
         }),
       ]);
       that.projectListView =
@@ -488,12 +591,12 @@ $(document).ready(function() {
 
     that.showProject = function(project) {
       try {
-	that.taskLists[self.names.urgentImportantListId] = null;
-	that.taskLists[self.names.urgentNotImportantListId] = null;
-	that.taskLists[self.names.notUrgentImportantListId] = null;
-	that.taskLists[self.names.notUrgentNotImportantListId] = null;
+        that.taskLists[self.names.urgentImportantListId] = null;
+        that.taskLists[self.names.urgentNotImportantListId] = null;
+        that.taskLists[self.names.notUrgentImportantListId] = null;
+        that.taskLists[self.names.notUrgentNotImportantListId] = null;
       } catch(error) {
-	// Ignore it.
+        // Ignore it.
       }
 
       // Add the new views.
@@ -580,6 +683,8 @@ $(document).ready(function() {
   //=======================================================================
   // Drag & Drop
   //=======================================================================
+
+  // Tasks + task groups
 
   $('.task-list').sortable({
     connectWith: '.task-list',
