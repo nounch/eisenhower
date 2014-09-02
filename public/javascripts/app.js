@@ -24,6 +24,7 @@ $(document).ready(function() {
     projectListItemClass: 'project-list-item',
     addProjectInputId: 'add-project-input',
     taskSelectionToggleClass: 'task-selection-toggle',
+    taskBoxClass: 'task-box',
 
     urgentImportantListId: 'urgent-important-list',
     urgentNotImportantListId: 'urgent-not-important-list',
@@ -39,7 +40,21 @@ $(document).ready(function() {
     currentProjectClass: 'current-project',
     projectListItemDataAttributeId: 'data-project-id',
 
+    optionsButtonClass: 'options-button',
+
     invisible: 'invisible',
+
+    // Data import/export/saving
+    localStorageProjectsKey: 'projects',
+
+    dataExportPanelClass: 'data-export-panel',
+    dataExportTextareaClass: 'data-export-textarea',
+    dataExportPanelCloseButtonClass: 'data-export-panel-close-button',
+
+    dataImportPanelClass: 'data-import-panel',
+    dataImportTextareaClass: 'data-import-textarea',
+    dataImportPanelCloseButtonClass: 'data-import-panel-close-button',
+    dataImportButtonClass: 'data-import-button',
   }
 
 
@@ -128,17 +143,43 @@ $(document).ready(function() {
   // Models + Collections
   //=======================================================================
 
+  // This are UI-events triggering CRUD operations:
+  // - loading the application: read `localStorage'
+  //
+  // - [x] create new project
+  // - [x] delete current project
+  // - [x] create new task
+  // - [x] delete task
+  // - [x] delete all selected tasks
+  // - [x] move task to other task list
+  // - [x] move task to other project
+  // - [x] move task to other position in current task list
+  // - [ ] change task text (not implemented yet)
+  // - [ ] change task selected status (not implemented yet)
+  // - [ ] change project name (not implemented yet)
+  // - [ ] sort projects list (not implemented yet)
+  // - [ ] sort task list (not implemented yet)
+
   self.Task = Backbone.Model.extend({
     defaults: {
       name: '',
       selected: false,
     },
+    localStorage: new Backbone.LocalStorage('task'),
   });
 
   // Collection
 
   self.TaskCollection = Backbone.Collection.extend({
     model: self.Task,
+    initialize: function() {
+      this.on('add', function(task) {
+        self.app.saveProjects();
+      });
+      this.on('remove', function(task) {
+        self.app.saveProjects();
+      });
+    },
   });
 
   self.Project = Backbone.Model.extend({
@@ -149,12 +190,21 @@ $(document).ready(function() {
       notUrgentImportantTaskList: new self.TaskCollection([]),
       notUrgentNotImportantTaskList: new self.TaskCollection([]),
     },
+    localStorage: new Backbone.LocalStorage('project'),
   });
 
   // Collection
 
   self.ProjectList = Backbone.Collection.extend({
     model: self.Project,
+    initialize: function() {
+      this.on('add', function(project) {
+        self.app.saveProjects();
+      });
+      this.on('remove', function(project) {
+        self.app.saveProjects();
+      });
+    },
   });
 
 
@@ -166,6 +216,8 @@ $(document).ready(function() {
     tagName: 'div',
     className: self.names.taskViewClass,
     initialize: function(options) {
+      var that = this;
+
       // The element to which the view should be appended.
       this.element = options['element'];
 
@@ -174,6 +226,11 @@ $(document).ready(function() {
         'removeThisTask';
       this.events['click .' + self.names.taskSelectionToggleClass] =
         'toggleSelected';
+
+      // Remove if all projects are remove.
+      this.listenTo(self.app, 'remove:all-projects', function() {
+        that.remove();
+      });
 
       this.$el.attr(self.names.taskViewDataAttributeTaskId, this.model.cid);
     },
@@ -341,6 +398,13 @@ $(document).ready(function() {
 
   self.App = function() {
     var that = this;
+
+    // Use this object as a primitive `message bus' (no queuing etc.!)
+    // since it provides a global-ish application state for various
+    // components anyway. Semantically, this fits better than introducing
+    // another special-purpose object.
+    _.extend(that, Backbone.Events);
+
     that.currentView = null;
     that.currentProject = null;
     that.dropTargetTaskList = null;
@@ -355,6 +419,9 @@ $(document).ready(function() {
     that.norender = false;
 
     that.start = function() {
+      // DEBUG: Clear all `localStorage' data
+      window.localStorage.clear();
+
       // Allow the app itself to trigger and listen to events.
       _.extend(that, Backbone.Events);
 
@@ -449,6 +516,19 @@ $(document).ready(function() {
             });
             that.taskLists[self.names.urgentImportantListId].model
               .unshift(newModel);
+
+            // Scroll the `Urgent + Important' task list to the top, so the
+            // newly inserted tasks are visible.
+            $('.' + self.names.taskBoxClass).first().animate({
+              'scrollTop': '0',
+            });
+
+            // Animation: Slide the new task in.
+            $('.' + self.names.taskBoxClass)
+              .find('.' + self.names.taskViewClass)
+              .first()
+              .hide()
+              .slideDown();
           }
           $(this).val('');
         }
@@ -485,6 +565,7 @@ $(document).ready(function() {
                 model: new self.TaskCollection([]),
               }).model,
             });
+
             self.app.projectListView.model.unshift(newProject);
             self.app.projectListView.render();
           }
@@ -653,7 +734,19 @@ $(document).ready(function() {
                 // animation).
                 that.projectListView.model.remove(that.currentProject.cid);
                 that.projectListView.render();
-                that.showProject(that.projectListView.model.models[0]);
+                // Show the first project, if there is one, else remove all
+                // remaining task objects that are still shown.
+                if (that.projectListView.model.models[0]) {
+                  that.showProject(that.projectListView.model.models[0]);
+                } else {
+                  that.trigger('remove:all-projects');
+
+                  // Empty all current task lists;
+                  var keys = Object.keys(that.taskLists);
+                  _.each(keys, function(key) {
+                    that.taskLists[key].model.models = [];
+                  });
+                }
               } catch(error) {
                 // Ignore it.
               }
@@ -670,6 +763,115 @@ $(document).ready(function() {
     that.highlightFirstProject = function() {
       $('.' + self.names.projectListItemClass + ':first')
         .addClass(self.names.currentProjectClass);
+    };
+
+    that.saveProjects = function() {
+      window.localStorage.clear();
+      window.localStorage.setItem(
+        self.names.localStorageProjectsKey,
+        JSON.stringify(that.projectListView.model));
+      console.log(Date.now());  // DEBUG
+      console.log(window.localStorage.getItem(self.names.localStorageProjectsKey));  // DEBUG
+
+      // console.log(that.projectListView.model);  // DEBUG
+    };
+
+    that.exportData = function() {
+      var data = window.localStorage.getItem(self.names.localStorageProjectsKey);
+
+      // Remove the textarea element and reappend it so that browserd do
+      // not `cache' the text of this textarea element because
+      // force-reloaing the page is not an option here.
+      var textarea = $('.' + self.names.dataExportTextareaClass);
+      var anchor = textarea.prev();
+      textarea.remove();
+      $(textarea).insertAfter(anchor);
+
+      $('.' + self.names.dataExportTextareaClass).text(data);
+      $('.' + self.names.dataExportPanelClass).slideDown();
+      $('.' + self.names.dataExportTextareaClass).select();
+    };
+
+    that.showImportPanel = function() {
+      $('.' + self.names.dataImportPanelClass).slideDown();
+      $('.' + self.names.dataImportTextareaClass).select();
+    };
+
+    that.importData = function(data) {
+
+      var keys = Object.keys(that.taskLists);
+      _.each(keys, function(key) {
+        that.taskLists[key].model.reset([]);
+        that.taskLists[key].render();
+      });
+
+      // Clear the project list
+      that.projectListView.model.reset([]);
+      that.projectListView.render();
+
+      var projects = JSON.parse(data);
+      var newProjects = new self.ProjectList([]);
+
+      _.each(projects, function(project) {
+        // Urgent + Important
+        var newUrgentImportantTaskList = new self.TaskCollection([]);
+        _.each(project.urgentImportantTaskList, function(task) {
+          var newTask = new self.Task({
+            name: task.name,
+            selected: task.selected,
+          });
+          newUrgentImportantTaskList.add(newTask);
+        });
+
+        // Not Urgent + Important
+        var newNotUrgentImportantTaskList = new self.TaskCollection([]);
+        _.each(project.notUrgentImportantTaskList, function(task) {
+          var newTask = new self.Task({
+            name: task.name,
+            selected: task.selected,
+          });
+          newNotUrgentImportantTaskList.add(newTask);
+        });
+
+        // Urgent + Not Important
+        var newUrgentNotImportantTaskList = new self.TaskCollection([]);
+        _.each(project.urgentNotImportantTaskList, function(task) {
+          var newTask = new self.Task({
+            name: task.name,
+            selected: task.selected,
+          });
+          newUrgentNotImportantTaskList.add(newTask);
+        });
+
+        // Not Urgent + Not Important
+        var newNotUrgentNotImportantTaskList = new self.TaskCollection([]);
+        _.each(project.notUrgentNotImportantTaskList, function(task) {
+          var newTask = new self.Task({
+            name: task.name,
+            selected: task.selected,
+          });
+          newNotUrgentNotImportantTaskList.add(newTask);
+        });
+
+        var newProject = new self.Project({
+          name: project.name,
+          urgentImportantTaskList: newUrgentImportantTaskList,
+          notUrgentImportantTaskList: newNotUrgentImportantTaskList,
+          urgentNotImportantTaskList: newUrgentNotImportantTaskList,
+          notUrgentNotImportantTaskList: newNotUrgentNotImportantTaskList,
+        });
+        newProjects.add(newProject);
+      });
+
+      that.projectListView =
+        new self.ProjectListView({model: newProjects});
+      that.projectListView.render();
+
+      // Show the first project.
+      var firstProject = that.projectListView.model.models[0]
+      that.showProject(firstProject);
+      that.setCurrentProject(firstProject);
+      that.highlightFirstProject();
     };
   };
 
@@ -732,6 +934,44 @@ $(document).ready(function() {
   $('.' + self.names.removeCurrentProjectButtonClass).click(function(e) {
     e.preventDefault();
     self.app.removeCurrentProject();
+  });
+
+  $('.' + self.names.optionsButtonClass).click(function(e) {
+    e.preventDefault();
+    // self.app.exportData();
+    self.app.showImportPanel();
+  });
+
+  // Make the data export panel closable.
+  $('.' + self.names.dataExportPanelCloseButtonClass).click(function() {
+    $('.' + self.names.dataExportPanelClass).animate({
+      'opacity': '0.0',
+    }, 'fast');
+    $('.' + self.names.dataExportPanelClass).slideUp(function() {
+      $('.' + self.names.dataExportPanelClass).css({'opacity': '1.0',});
+    });
+  });
+
+  // Make the data import panel closable.
+  $('.' + self.names.dataImportPanelCloseButtonClass).click(function() {
+    $('.' + self.names.dataImportPanelClass).animate({
+      'opacity': '0.0',
+    }, 'fast');
+    $('.' + self.names.dataImportPanelClass).slideUp(function() {
+      $('.' + self.names.dataImportPanelClass).css({'opacity': '1.0',});
+    });
+  });
+
+  // Make data import button import the data.
+  $('.' + self.names.dataImportButtonClass).click(function() {
+    $('.' + self.names.dataImportPanelClass).animate({
+      'opacity': '0.0',
+    }, 'fast');
+    $('.' + self.names.dataImportPanelClass).slideUp(function() {
+      $('.' + self.names.dataImportPanelClass).css({'opacity': '1.0',});
+    });
+    var data = $('.' + self.names.dataImportTextareaClass).val();
+    self.app.importData(data);
   });
 
 });
