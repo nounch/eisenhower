@@ -47,6 +47,9 @@ $(document).ready(function() {
     // Data import/export/saving
     localStorageProjectsKey: 'projects',
 
+    exportDataButtonClass: 'export-data-button',
+    importDataButtonClass: 'import-data-button',
+
     dataExportPanelClass: 'data-export-panel',
     dataExportTextareaClass: 'data-export-textarea',
     dataExportPanelCloseButtonClass: 'data-export-panel-close-button',
@@ -55,6 +58,11 @@ $(document).ready(function() {
     dataImportTextareaClass: 'data-import-textarea',
     dataImportPanelCloseButtonClass: 'data-import-panel-close-button',
     dataImportButtonClass: 'data-import-button',
+
+    // Dropdown menus
+    dropdownMenuClass: 'drop-menu',
+    dropdownMenuButtonClass: 'drop-menu-button',
+    dropdownMenuBodyClass: 'drop-menu-body',
   }
 
 
@@ -947,10 +955,20 @@ $(document).ready(function() {
     self.app.removeCurrentProject();
   });
 
-  $('.' + self.names.optionsButtonClass).click(function(e) {
+  // Import data button
+  $('.' + self.names.importDataButtonClass).click(function(e) {
     e.preventDefault();
-    // self.app.exportData();
     self.app.showImportPanel();
+    // Hide the dropdown menu.
+    $('.' + self.names.dropdownMenuBodyClass).fadeOut('fast');
+  });
+
+  // Export data button
+  $('.' + self.names.exportDataButtonClass).click(function(e) {
+    e.preventDefault();
+    self.app.exportData();
+    // Hide the dropdown menu.
+    $('.' + self.names.dropdownMenuBodyClass).fadeOut('fast');
   });
 
   // Make the data export panel closable.
@@ -983,6 +1001,24 @@ $(document).ready(function() {
     });
     var data = $('.' + self.names.dataImportTextareaClass).val();
     self.app.importData(data);
+  });
+
+
+  // Dropdown menus
+
+  $('.' + self.names.dropdownMenuButtonClass).click(function(e) {
+    e.preventDefault();
+    $(this).parent('.' + self.names.dropdownMenuClass)
+      .find('.' + self.names.dropdownMenuBodyClass).fadeToggle('fast');
+    e.stopPropagation();
+  });
+
+  $('.' + self.names.dropdownMenuClass).click(function(e) {
+    e.stopPropagation();
+  });  
+
+  $(document).click(function(e) {
+    $('.' + self.names.dropdownMenuBodyClass).fadeOut('fast');
   });
 
 });

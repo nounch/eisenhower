@@ -250,11 +250,13 @@ hr .invisible {
 }
 .remove-selected-button, .remove-current-project-button {
   background-color: rgba(0, 0, 0, 0.05);
+  margin-bottom: 3px;
 }
 
 .remove-selected-button:hover, .remove-current-project-button:hover {
   background-color: rgba(250, 80, 80, 0.2);
   color: #AF1212 !important;
+  margin-bottom: 3px;
 }
 
 .options-button {
@@ -310,4 +312,37 @@ hr .invisible {
 .panel {
   border-radius: 6px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+}
+
+
+/**************************************************************************
+ * Dropdown menus
+ *************************************************************************/
+
+.drop-menu-body {
+  position: absolute;
+  z-index: 9999;
+  display: none;
+  background-color: #FEFEFD;
+  padding: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 5px rgba(50, 50, 150, 0.3);
+  border-radius: 6px;
+  margin-top: 5px;
+}
+
+.drop-menu-body:before {
+  content: ' ';
+  position: fixed;
+  margin-top: -15px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 5px 5px 5px;
+  border-color: transparent transparent #FEFEFD transparent;
+}
+
+.drop-menu-body * {
+  width: 100%;
+  text-align: left;
 }

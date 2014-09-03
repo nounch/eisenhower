@@ -19,9 +19,17 @@
           <input type="text" id="new-task-input" class="form-control" value="" placeholder="Add a new task"/>
         </div>
         <div class="top-bar-buttons pull-right">
-          <button type="button" class="btn btn-link btn-xs remove-selected-button" title="Remove all selected tasks">&times; Remove selected</button>
-          <button type="button" class="btn btn-link btn-xs remove-current-project-button">&times; Remove current project</button>
-          <button type="button" class="btn btn-link btn-xs options-button">Options</button>
+
+	  <div class="drop-menu">
+            <button type="button" class="btn btn-link btn-xs options-button drop-menu-button">Options</button>
+            <div class="drop-menu-body">
+              <button type="button" class="btn btn-link btn-sm remove-selected-button" title="Remove all selected tasks">&times; Remove selected tasks</button>
+              <button type="button" class="btn btn-link btn-sm remove-current-project-button">&times; Remove current project</button>
+              <button type="button" class="btn btn-link btn-sm import-data-button">Import</button>
+              <button type="button" class="btn btn-link btn-sm export-data-button">Export</button>
+            </div>
+	  </div>
+
         </div>
       </div>
     </div>
