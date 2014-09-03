@@ -510,25 +510,34 @@ $(document).ready(function() {
         if (e.which == 13) {
           e.preventDefault();
           var value = $(this).val();
-          if (!/^\s*$/.test(value)) {  // Discard empty strings.
-            var newModel = new self.Task({
-              name: value,
-            });
-            that.taskLists[self.names.urgentImportantListId].model
-              .unshift(newModel);
+          // Discard empty strings.
+          if (!/^\s*$/.test(value)) {
+	    // Focus the `Add a new project' input field if there is no
+	    // project defined yet.
+            if (that.currentProject == null) {
+              $('#' + self.names.addProjectInputId).focus();
+            } else {
+              console.log(self.app.currentProject);  // DEBUG
+              var newModel = new self.Task({
+		name: value,
+              });
+              that.taskLists[self.names.urgentImportantListId].model
+		.unshift(newModel);
 
-            // Scroll the `Urgent + Important' task list to the top, so the
-            // newly inserted tasks are visible.
-            $('.' + self.names.taskBoxClass).first().animate({
-              'scrollTop': '0',
-            });
+              // Scroll the `Urgent + Important' task list to the top, so
+	      // the newly inserted tasks are visible.
+              $('.' + self.names.taskBoxClass).first().animate({
+		'scrollTop': '0',
+              });
 
-            // Animation: Slide the new task in.
-            $('.' + self.names.taskBoxClass)
-              .find('.' + self.names.taskViewClass)
-              .first()
-              .hide()
-              .slideDown();
+              // Animation: Slide the new task in.
+              $('.' + self.names.taskBoxClass)
+		.find('.' + self.names.taskViewClass)
+		.first()
+		.hide()
+		.slideDown();
+
+            }
           }
           $(this).val('');
         }
@@ -746,6 +755,8 @@ $(document).ready(function() {
                   _.each(keys, function(key) {
                     that.taskLists[key].model.models = [];
                   });
+
+		  that.currentProject = null;
                 }
               } catch(error) {
                 // Ignore it.
