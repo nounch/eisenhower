@@ -520,30 +520,30 @@ $(document).ready(function() {
           var value = $(this).val();
           // Discard empty strings.
           if (!/^\s*$/.test(value)) {
-	    // Focus the `Add a new project' input field if there is no
-	    // project defined yet.
+            // Focus the `Add a new project' input field if there is no
+            // project defined yet.
             if (that.currentProject == null) {
               $('#' + self.names.addProjectInputId).focus();
             } else {
               console.log(self.app.currentProject);  // DEBUG
               var newModel = new self.Task({
-		name: value,
+                name: value,
               });
               that.taskLists[self.names.urgentImportantListId].model
-		.unshift(newModel);
+                .unshift(newModel);
 
               // Scroll the `Urgent + Important' task list to the top, so
-	      // the newly inserted tasks are visible.
+              // the newly inserted tasks are visible.
               $('.' + self.names.taskBoxClass).first().animate({
-		'scrollTop': '0',
+                'scrollTop': '0',
               });
 
               // Animation: Slide the new task in.
               $('.' + self.names.taskBoxClass)
-		.find('.' + self.names.taskViewClass)
-		.first()
-		.hide()
-		.slideDown();
+                .find('.' + self.names.taskViewClass)
+                .first()
+                .hide()
+                .slideDown();
 
             }
           }
@@ -764,7 +764,7 @@ $(document).ready(function() {
                     that.taskLists[key].model.models = [];
                   });
 
-		  that.currentProject = null;
+                  that.currentProject = null;
                 }
               } catch(error) {
                 // Ignore it.
@@ -945,14 +945,27 @@ $(document).ready(function() {
   // Buttons etc.
   //=======================================================================
 
+  // `Remove selected tasks' button.
   $('.' + self.names.removeSelectedButtonClass).click(function(e) {
     e.preventDefault();
-    self.app.removeSelectedTasks();
+    self.confirmationDialog({
+      text: 'Do you really want to remove all currently selected tasks?',
+      yes: 'Yes',
+      no: 'No',
+      action: self.app.removeSelectedTasks,
+    });
   });
 
+  // `Remove current project' button.
   $('.' + self.names.removeCurrentProjectButtonClass).click(function(e) {
     e.preventDefault();
-    self.app.removeCurrentProject();
+    // self.app.removeCurrentProject();
+    self.confirmationDialog({
+      text: 'Do you really want to remove the current project?',
+      yes: 'Yes',
+      no: 'No',
+      action: self.app.removeCurrentProject,
+    });
   });
 
   // Import data button
@@ -1015,10 +1028,143 @@ $(document).ready(function() {
 
   $('.' + self.names.dropdownMenuClass).click(function(e) {
     e.stopPropagation();
-  });  
+  });
 
   $(document).click(function(e) {
     $('.' + self.names.dropdownMenuBodyClass).fadeOut('fast');
   });
+
+
+  //=======================================================================
+  // Confirmation menu
+  //=======================================================================
+
+  self.confirmationDialog = function(options) {
+    var text = options['text'] || 'Really perform that action?';
+    var yes = options['yes'] || 'Yes';
+    var no = options['no'] || 'No';
+    var action = options['action'] || function() { /* Do nothing. */ };
+
+    var dialog = $(
+      '<div class="confirmation-dialog">' +
+	'<div class="confirmation-dialog-backdrop"></div>' +
+
+      '<div class="confirmation-dialog-body">' +
+
+      '<p class="confirmation-dialog-text">' +
+        text +
+        '<p>' +
+
+      '<div class="confirmation-dialog-button-panel">' +
+        '<a href="" class="confirmation-dialog-yes-button">' +
+        yes +
+        '</a>' +
+        '<a href="" class="confirmation-dialog-no-button">' +
+        no +
+        '</a>' +
+        '</div>' +
+
+      '</div>'+
+
+      '</div>'
+    );
+
+    // Append the element.
+    $('body').append($(dialog));
+
+    // Styling
+
+    $('.confirmation-dialog-body').css({
+      'position': 'fixed',
+      'width': '280px',
+      'height': '180px',
+      'padding': '20px',
+      'top': '50%',
+      'left': '50%',
+      'margin-top': '-140px',
+      'margin-left': '-140px',
+      'z-index': '9999',
+      'background-color': '#FEFEFD',
+      'border': '1px solid rgba(0, 0, 0, 0.3)',
+      'box-shadow': '0 2px 5px rgba(50, 50, 150, 0.3)',
+      'border-radius': '6px',
+      'text-align': 'center',
+    });
+
+    $('.confirmation-dialog-button-panel').css({
+      'display': 'inline',
+    });
+
+    $('.confirmation-dialog-button-panel').css({
+      'padding': '30px',
+      'display': 'block',
+    });
+
+    $('.confirmation-dialog-button-panel a').css({
+      'margin': '20px',
+      'padding': '10px',
+      'border-radius': '6px',
+      // 'border': '1px solid rgba(0, 0, 0, 0.3)',
+      'background-color': '#E1E1E1',
+      'color': '#F8F8F8',
+    });
+
+    $('.confirmation-dialog-button-panel a').mouseover(function(e) {
+      $(this).css({
+        'text-decoration': 'none',
+        'opacity': '0.8',
+      });
+    });
+
+    $('.confirmation-dialog-button-panel a').mouseout(function(e) {
+      $(this).css({
+        'opacity': '1.0',
+      });
+    });
+
+    $('.confirmation-dialog-yes-button').css({
+      'background-color': 'green',
+    });
+
+    $('.confirmation-dialog-no-button').css({
+      'background-color': '#AF1212',
+    });
+
+    $('.confirmation-dialog-backdrop').css({
+      'position': 'fixed',
+      'top': '0',
+      'left': '0',
+      'background-color': 'rgba(0, 0, 0, 0.3)',
+      'width': '100%',
+      'height': '100%',
+      'z-index': '9998',
+    });
+
+    $('.confirmation-dialog-body').css({
+      'z-index': '9999',
+    });
+
+    // Functionality
+
+    // Handle a `Yes' button click.
+    $('.confirmation-dialog-yes-button').click(function(e) {
+      e.preventDefault();
+      $(dialog).fadeOut().remove();
+      action();
+    });
+
+    // Handle a `No' button click.
+    $('.confirmation-dialog-no-button').click(function(e) {
+      e.preventDefault();
+      $(dialog).fadeOut().remove();
+    });
+
+    // Handle a backdrop button click.
+    $('.confirmation-dialog-backdrop').click(function(e) {
+      e.preventDefault();
+      $(dialog).fadeOut().remove();
+    });
+
+  }
 
 });

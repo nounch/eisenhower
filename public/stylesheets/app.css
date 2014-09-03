@@ -2,6 +2,10 @@ body {
   background-color: #E1E1E1;
 }
 
+html {
+  overflow-y: scroll;
+}
+
 #main-content {
   background-color: #E1E1E1;
 }
@@ -321,7 +325,7 @@ hr .invisible {
 
 .drop-menu-body {
   position: absolute;
-  z-index: 9999;
+  z-index: 9997;
   display: none;
   background-color: #FEFEFD;
   padding: 10px;
