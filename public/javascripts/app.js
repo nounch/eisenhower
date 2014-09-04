@@ -25,6 +25,9 @@ $(document).ready(function() {
     addProjectInputId: 'add-project-input',
     taskSelectionToggleClass: 'task-selection-toggle',
     taskBoxClass: 'task-box',
+    taskNameClass: 'task-name',
+    taskNonEditableClass: 'task-non-editable',
+    taskTextBoxClass: 'task-text-box',
 
     urgentImportantListId: 'urgent-important-list',
     urgentNotImportantListId: 'urgent-not-important-list',
@@ -234,16 +237,47 @@ $(document).ready(function() {
         'removeThisTask';
       this.events['click .' + self.names.taskSelectionToggleClass] =
         'toggleSelected';
+      this.events['keyup .' + self.names.taskTextBoxClass] =
+	'changeName';
 
       // Remove if all projects are remove.
       this.listenTo(self.app, 'remove:all-projects', function() {
         that.remove();
       });
 
-      this.$el.attr(self.names.taskViewDataAttributeTaskId, this.model.cid);
+      this.$el.attr(self.names.taskViewDataAttributeTaskId,
+		    this.model.cid);
     },
     events: {
       'drop': 'drop',
+      'dblclick': 'edit',
+    },
+    edit: function(e) {
+      var that = this;
+      that.$el.find('.' + self.names.taskNonEditableClass)
+        .slideUp(80, function() {
+          that.$el.find('.' + self.names.taskTextBoxClass)
+	    .slideDown(80).select();
+	});
+    },
+    changeName: function(e) {
+      var that = this;
+      var newName = that.$el.find('.' + self.names.taskTextBoxClass).val();
+      if (e.which == 13 || e.which == 27) {  // Return & Escape
+	e.preventDefault();
+	if (e.which == 13 && !/^\s*$/.test(newName)) {  // Return
+	  that.model.set({name: newName});
+	}
+	that.$el.find('.' + self.names.taskTextBoxClass)
+          .fadeOut(80, function() {
+            that.$el.find('.' + self.names.taskNameClass)
+              .fadeIn(80, function() {
+		// Save the new value
+		self.app.saveProjects();
+		that.rerender();
+	      }).select();
+          });
+      }
     },
     drop: function(e, options) {
       var index = options['index'] || 0;
@@ -269,10 +303,14 @@ $(document).ready(function() {
     },
     toggleSelected: function() {
       this.model.set({selected: !this.model.get('selected')})
+      self.app.saveProjects();
     },
     template: function(data) {
       return _.template($('#' + self.names.taskViewTemplateId)
                         .html(), data.toJSON());
+    },
+    rerender: function() {
+      this.$el.html(this.template(this.model));
     },
     render: function() {
       this.$el.html(this.template(this.model));

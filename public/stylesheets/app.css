@@ -147,6 +147,15 @@ hr .invisible {
   margin-right: 30px;
 }
 
+.task-text-box {
+  height: 30px;
+  margin-left: 5px;
+  border-radius: 3px;
+  border: 2px solid rgba(0, 0, 0, 0.3);
+  background-color: #FEFEFD;
+  color: #57534A;
+}
+
 .task-list {
   min-height: 80%;
 }

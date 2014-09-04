@@ -115,8 +115,11 @@
 
     <script type="text/template" id="task-view-template">
       <div class="pull-left task-selection-toggle"><input type="checkbox" <% if(selected) { %><%- 'checked=""' %><% } %>/></div>
-      <div class="task-name" title="<%- name %>"><%- name %></div>
-      <button type="button" class="pull-right remove-task-button">&times;</button>
+      <div class="task-non-editable">
+        <div class="task-name" title="<%- name %>"><%- name %></div>
+	<button type="button" class="pull-right remove-task-button">&times;</button>
+      </div>
+      <input type="text" class="task-text-box collapse" value="<%- name %>" />
     </script>
 
     <script type="text/template" id="task-list-view-template">
