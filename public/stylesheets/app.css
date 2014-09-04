@@ -375,3 +375,10 @@ hr .invisible {
   width: 100%;
   text-align: left;
 }
+
+.drop-menu-separator {
+  width: 100%;
+  border-bottom: 1px solid #E1E1E1;
+  margin-top: 2px;
+  margin-bottom: 2px;
+}

@@ -68,6 +68,9 @@ $(document).ready(function() {
     dropdownMenuClass: 'drop-menu',
     dropdownMenuButtonClass: 'drop-menu-button',
     dropdownMenuBodyClass: 'drop-menu-body',
+
+    // Info Modal
+    appInfoButtonClass: 'app-info-button',
   }
 
 
@@ -1107,6 +1110,131 @@ $(document).ready(function() {
   });
 
 
+  // App info
+
+  $('.' + self.names.appInfoButtonClass).click(function(e) {
+    e.preventDefault();
+    self.infoBox(
+      '\
+<h2>Info</h2>\
+\
+\
+<p>\
+  <em>Eisenhower</em>\
+  lets you manage tasks using the\
+  <a href="http://en.wikipedia.org/wiki/Time_management#The_Eisenhower_Method">\
+    Eisenhower method\
+  </a>\
+  .\
+</p>\
+\
+\
+<hr/>\
+<h3>Projects</h3>\
+<p>\
+  To organize your tasks, you can have multiple\
+  <strong>projects</strong>\
+  . Every project has four task lists associated with it:\
+  <ol>\
+    <li><strong>Urgent + important</strong></li>\
+    <li><strong>Not urgent + important</strong></li>\
+    <li><strong>Urgent + not important</strong></li>\
+    <li><strong>Not urgent + not important</strong></li>\
+  </ol>\
+  To create a project, click\
+  <strong>Add a new project</strong>\
+  and give your new project a name.\
+</p>\
+\
+<p>\
+  A project can be renamed by double clicking its name in the project\
+  list.\
+</p>\
+\
+\
+<hr/>\
+<h3>Tasks</h3>\
+<p>\
+  Every task is assigned to one of the four task lists\
+  <strong>Urgent + important</strong>,\
+  <strong>Not urgent + important</strong>,\
+  <strong>Urgent + not important</strong> or\
+  <strong>Not urgent + not important</strong>\
+  .\
+</p>\
+\
+<p>\
+  A task can be moved between lists by dragging it from its current\
+  list and dropping it onto a different list. The position of a task \
+  within a list can be changed by drag & drop, too.\
+</p>\
+\
+<p>\
+  To create a task, click the\
+  <strong>Add a new task</strong>\
+  text box and give your new project a name. Every new task is added to\
+  the\
+  <strong>Urgent + important</strong>\
+  task list of the current project.\
+</p>\
+\
+<p>\
+  To select a task, use its checkbox.\
+</p>\
+\
+<p>\
+  To rename a task, double click its name.\
+</p>\
+\
+<p>\
+  To remove a task, click its close button (\
+  <span class="close-button">&times;</span>\
+  ).\
+</p>\
+\
+\
+<hr/>\
+<h3>Options</h3>\
+<p>\
+  To access various options, click the\
+  <strong>Options</strong>\
+  button.\
+</p>\
+\
+<p>\
+  These are the available options:\
+  <ul>\
+    <li><strong>Remove selected tasks</strong>:\
+      Remove all selected task of the currently active project (\
+      No worries, selected tasks of other projects will not be\
+      removed)</li>\
+    <li><strong>Remove current project</strong>:\
+      Remove the currently active project.</li>\
+    <li><strong>Import</strong>:\
+      Import projects data.</li>\
+    <li><strong>Export</strong>:\
+      Export the data for all projects; this data can be imported using\
+     the\
+      <strong>Import</strong> option.</li>\
+    <li><strong>Info</strong>:\
+      Shows this info.</li>\
+  </ul>\
+\
+</p>\
+\
+\
+<hr/>\
+<h3>Saving</h3>\
+<p>\
+  <em>Eisenhower</em> automatically saves every action you perform.\
+  Manual saving is not required.\
+</p>\
+\
+<hr/>\
+'
+    );
+  });
+
   //=======================================================================
   // Confirmation menu
   //=======================================================================
@@ -1142,7 +1270,7 @@ $(document).ready(function() {
     );
 
     // Append the element.
-    $('body').append($(dialog));
+    $('body').append($(dialog).hide().fadeIn());
 
     // Styling
 
@@ -1176,7 +1304,6 @@ $(document).ready(function() {
       'margin': '20px',
       'padding': '10px',
       'border-radius': '6px',
-      // 'border': '1px solid rgba(0, 0, 0, 0.3)',
       'background-color': '#E1E1E1',
       'color': '#F8F8F8',
     });
@@ -1218,25 +1345,117 @@ $(document).ready(function() {
 
     // Functionality
 
+    var hideDialog = function() {
+      $(dialog).fadeOut(function() {
+        $(this).remove('fast');
+      });
+    };
+
     // Handle a `Yes' button click.
     $('.confirmation-dialog-yes-button').click(function(e) {
       e.preventDefault();
-      $(dialog).fadeOut().remove();
+      hideDialog();
       action();
     });
 
     // Handle a `No' button click.
     $('.confirmation-dialog-no-button').click(function(e) {
       e.preventDefault();
-      $(dialog).fadeOut().remove();
+      hideDialog();
     });
 
     // Handle a backdrop button click.
     $('.confirmation-dialog-backdrop').click(function(e) {
       e.preventDefault();
-      $(dialog).fadeOut().remove();
+      hideDialog();
     });
 
   }
 
+
+  //=======================================================================
+  // Info Box
+  //=======================================================================
+
+  self.infoBox = function(html) {
+    var infoBox = $(
+      '<div class="info-modal-box">' +
+        '<div class="info-modal-backdrop"></div>' +
+
+      '<div class="info-modal-body">' +
+	'<a href="#" class="info-modal-close-button">&times;</a>' +
+        html +
+      '</div>'+
+
+      '</div>'
+    );
+
+    // Append the element.
+    $('body').append($(infoBox).hide().fadeIn());
+
+    infoBox
+
+    $('.info-modal-box').css({
+      'position': 'absolute',
+    });
+
+    $('.info-modal-body').css({
+      'position': 'fixed',
+      'top': '0',
+      'left': '0',
+      'width': '50%',
+      'height': '100%',
+      'padding': '20px',
+      'background-color': '#FEFEFD',
+      'border': '1px solid rgba(0, 0, 0, 0.3)',
+      'box-shadow': '0 2px 35px rgba(50, 50, 150, 0.3)',
+      'z-index': '9999',
+      'overflow': 'auto',
+    });
+
+    $('.info-modal-backdrop').css({
+      'position': 'fixed',
+      'top': '0',
+      'left': '0',
+      'background-color': 'rgba(255, 255, 255, 0.5)',
+      'width': '100%',
+      'height': '100%',
+      'z-index': '9998',
+    });
+
+    $('.info-modal-close-button').css({
+      'float': 'right',
+      'color': '#57534A',
+      'font-size': '25px',
+      'font-weight': 'bold',
+    });
+
+    $('.info-modal-close-button').mouseover(function() {
+      $(this).css({
+	'opacity': '0.8',
+	'text-decoration': 'none',
+      });
+    });
+
+    $('.info-modal-close-button').mouseout(function() {
+      $(this).css({
+        'opacity': '1.0',
+      });
+    });
+
+    // Functionality
+
+    var hideInfoModal = function() {
+      $(infoBox).fadeOut(function() {
+	$(this).remove('fast');
+      });
+    };
+
+    // Handle a backdrop button click.
+    $('.info-modal-backdrop, .info-modal-close-button').click(function(e) {
+      e.preventDefault();
+      hideInfoModal();
+    });
+
+  };
 });
