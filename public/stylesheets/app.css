@@ -207,6 +207,22 @@ hr .invisible {
   transition: all 120ms ease-out;
 }
 
+.project-text-box {
+  color: #919191;
+  font-size: 1.1em;
+  font-style: italic;
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-top: 15px;
+  padding-bottom: 15px;
+  max-width: 280px;
+  margin-right: 50px;
+  border-radius: 0;
+  width: 100%;
+  text-align: left;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+}
+
 .current-project a,
 .current-project a:focus {
   color: #57534A;

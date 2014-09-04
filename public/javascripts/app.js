@@ -22,6 +22,8 @@ $(document).ready(function() {
     projectListViewId: 'project-list-view',
     projectListViewAnchorId: 'projects-list-anchor',
     projectListItemClass: 'project-list-item',
+    projectNonEditableClass: 'project-non-editable',
+    projectTextBoxClass: 'project-text-box',
     addProjectInputId: 'add-project-input',
     taskSelectionToggleClass: 'task-selection-toggle',
     taskBoxClass: 'task-box',
@@ -238,7 +240,7 @@ $(document).ready(function() {
       this.events['click .' + self.names.taskSelectionToggleClass] =
         'toggleSelected';
       this.events['keyup .' + self.names.taskTextBoxClass] =
-	'changeName';
+        'changeName';
 
       // Remove if all projects are remove.
       this.listenTo(self.app, 'remove:all-projects', function() {
@@ -246,7 +248,7 @@ $(document).ready(function() {
       });
 
       this.$el.attr(self.names.taskViewDataAttributeTaskId,
-		    this.model.cid);
+                    this.model.cid);
     },
     events: {
       'drop': 'drop',
@@ -257,25 +259,25 @@ $(document).ready(function() {
       that.$el.find('.' + self.names.taskNonEditableClass)
         .slideUp(80, function() {
           that.$el.find('.' + self.names.taskTextBoxClass)
-	    .slideDown(80).select();
-	});
+            .slideDown(80).select();
+        });
     },
     changeName: function(e) {
       var that = this;
       var newName = that.$el.find('.' + self.names.taskTextBoxClass).val();
       if (e.which == 13 || e.which == 27) {  // Return & Escape
-	e.preventDefault();
-	if (e.which == 13 && !/^\s*$/.test(newName)) {  // Return
-	  that.model.set({name: newName});
-	}
-	that.$el.find('.' + self.names.taskTextBoxClass)
+        e.preventDefault();
+        if (e.which == 13 && !/^\s*$/.test(newName)) {  // Return
+          that.model.set({name: newName});
+        }
+        that.$el.find('.' + self.names.taskTextBoxClass)
           .fadeOut(80, function() {
             that.$el.find('.' + self.names.taskNameClass)
               .fadeIn(80, function() {
-		// Save the new value
-		self.app.saveProjects();
-		that.rerender();
-	      }).select();
+                // Save the new value
+                self.app.saveProjects();
+                that.rerender();
+              }).select();
           });
       }
     },
@@ -381,9 +383,41 @@ $(document).ready(function() {
     className: self.names.projectListItemClass,
     events: {
       'click': 'showThisProject',
+      'dblclick': 'edit',
     },
     initialize: function() {
       self.makeProjectDroppable(this);
+
+      // Bind events
+      this.events['keyup .' + self.names.projectTextBoxClass] =
+        'changeName';
+    },
+    edit: function(e) {
+      var that = this;
+      that.$el.find('.' + self.names.projectNonEditableClass)
+        .slideUp(80, function() {
+          that.$el.find('.' + self.names.projectTextBoxClass)
+            .slideDown(80).select();
+        });
+    },
+    changeName: function(e) {
+      var that = this;
+      var newName = that.$el.find('.' + self.names.projectTextBoxClass).val();
+      if (e.which == 13 || e.which == 27) {  // Return & Escape
+        e.preventDefault();
+        if (e.which == 13 && !/^\s*$/.test(newName)) {  // Return
+          that.model.set({name: newName});
+        }
+        that.$el.find('.' + self.names.projectTextBoxClass)
+          .fadeOut(80, function() {
+            that.$el.find('.' + self.names.projectListItemClass)
+              .fadeIn(80, function() {
+                // Save the new value
+                self.app.saveProjects();
+                that.render();
+              }).select();
+          });
+      }
     },
     showThisProject: function(e) {
       e.preventDefault();
@@ -1085,7 +1119,7 @@ $(document).ready(function() {
 
     var dialog = $(
       '<div class="confirmation-dialog">' +
-	'<div class="confirmation-dialog-backdrop"></div>' +
+        '<div class="confirmation-dialog-backdrop"></div>' +
 
       '<div class="confirmation-dialog-body">' +
 

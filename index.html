@@ -127,7 +127,10 @@
     </script>
 
     <script type="text/template" id="project-list-item-template">
-      <a href="#" class="btn project-list-item" title="<%- project.name %>" data-project-id="<%- project.cid %>"><%- project.name %></a>
+      <div class="project-non-editable">
+        <a href="#" class="btn project-list-item" title="<%- project.name %>" data-project-id="<%- project.cid %>"><%- project.name %></a>
+      </div>
+      <input type="text" class="project-text-box collapse" value="<%- project.name %>" />
     </script>
 
 
