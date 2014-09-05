@@ -170,11 +170,11 @@ $(document).ready(function() {
   // - [x] move task to other task list
   // - [x] move task to other project
   // - [x] move task to other position in current task list
-  // - [ ] change task text (not implemented yet)
-  // - [ ] change task selected status (not implemented yet)
-  // - [ ] change project name (not implemented yet)
+  // - [x] change task text
+  // - [x] change task selected status
+  // - [x] change project
   // - [ ] sort projects list (not implemented yet)
-  // - [ ] sort task list (not implemented yet)
+  // - [ ] sort task list by attribute (not implemented yet)
 
   self.Task = Backbone.Model.extend({
     defaults: {
