@@ -502,9 +502,6 @@ $(document).ready(function() {
     that.norender = false;
 
     that.start = function() {
-      // DEBUG: Clear all `localStorage' data
-      window.localStorage.clear();
-
       // Allow the app itself to trigger and listen to events.
       _.extend(that, Backbone.Events);
 
@@ -514,44 +511,49 @@ $(document).ready(function() {
       // Initialize the project list view.
       that.projectListView = new self.ProjectListView({});
 
-      var testTastList = new self.TaskCollection([
-        new self.Task({
-          name: 'Red task',
-          selected: false,
-        }),
-        new self.Task({
-          name: 'Green test task',
-          selected: true,
-        }),
-        new self.Task({
-          name: 'Blue test taks with a very long name',
-          selected: true,
-        }),
+      var testTaskList = new self.TaskCollection([
+        // This is some test data intended for debugging.
+        // Do not remove this!
+        // (It may not conform to best practices, but it is incredibly
+        // useful to have this around.)
 
-        new self.Task({
-          name: 'Blue test taks with a very long name',
-          selected: true,
-        }),
-        new self.Task({
-          name: 'Blue test taks with a very long name',
-          selected: false,
-        }),
-        new self.Task({
-          name: 'Blue test taks with a very long name',
-          selected: true,
-        }),
-        new self.Task({
-          name: 'Blue test taks with a very long name',
-          selected: false,
-        }),
-        new self.Task({
-          name: 'Blue test taks with a very long name',
-          selected: true,
-        }),
-        new self.Task({
-          name: 'Blue test taks with a very long name',
-          selected: false,
-        }),
+        // new self.Task({
+        //   name: 'Red task',
+        //   selected: false,
+        // }),
+        // new self.Task({
+        //   name: 'Green test task',
+        //   selected: true,
+        // }),
+        // new self.Task({
+        //   name: 'Blue test taks with a very long name',
+        //   selected: true,
+        // }),
+
+        // new self.Task({
+        //   name: 'Blue test taks with a very long name',
+        //   selected: true,
+        // }),
+        // new self.Task({
+        //   name: 'Blue test taks with a very long name',
+        //   selected: false,
+        // }),
+        // new self.Task({
+        //   name: 'Blue test taks with a very long name',
+        //   selected: true,
+        // }),
+        // new self.Task({
+        //   name: 'Blue test taks with a very long name',
+        //   selected: false,
+        // }),
+        // new self.Task({
+        //   name: 'Blue test taks with a very long name',
+        //   selected: true,
+        // }),
+        // new self.Task({
+        //   name: 'Blue test taks with a very long name',
+        //   selected: false,
+        // }),
 
       ]);
 
@@ -563,7 +565,7 @@ $(document).ready(function() {
       that.taskLists[self.names.urgentImportantListId] =
         new self.TaskListView({
           name: self.names.urgentImportantListId,
-          model: testTastList,
+          model: testTaskList,
         });
       that.taskLists[self.names.urgentImportantListId].render();
       // `urgent + not important'
@@ -600,7 +602,6 @@ $(document).ready(function() {
             if (that.currentProject == null) {
               $('#' + self.names.addProjectInputId).focus();
             } else {
-              console.log(self.app.currentProject);  // DEBUG
               var newModel = new self.Task({
                 name: value,
               });
@@ -683,45 +684,52 @@ $(document).ready(function() {
       // Projects
 
       var testProjects = new self.ProjectList([
-        new self.Project({
-          name: 'Test project',
-          urgentImportantTaskList: that.taskLists[
-            self.names.urgentImportantListId].model,
-          urgentNotImportantTaskList: that.taskLists[
-            self.names.urgentNotImportantListId].model,
-          notUrgentImportantTaskList: that.taskLists[
-            self.names.notUrgentImportantListId].model,
-          notUrgentNotImportantTaskList: that.taskLists[
-            self.names.notUrgentNotImportantListId].model,
-        }),
-        new self.Project({
-          name: 'Another test project',
-          urgentImportantTaskList: new self.TaskListView({
-            name: self.names.urgentImportantListId,
-            model: new self.TaskCollection([]),
-          }).model,
-          urgentNotImportantTaskList: new self.TaskListView({
-            name: self.names.urgentNotImportantListId,
-            model: new self.TaskCollection([]),
-          }).model,
-          notUrgentImportantTaskList: new self.TaskListView({
-            name: self.names.notUrgentImportantListId,
-            model: new self.TaskCollection([]),
-          }).model,
-          notUrgentNotImportantTaskList: new self.TaskListView({
-            name: self.names.notUrgentNotImportantListId,
-            model: new self.TaskCollection([]),
-          }).model,
-        }),
-        new self.Project({
-          name: '!!! Mega project'
-        }),
-        new self.Project({
-          name: '!!! A project with a very long name just for testin purposes'
-        }),
-        new self.Project({
-          name: '!!! Super thing'
-        }),
+        // This is some test data intended for debugging.
+        // Do not remove this!
+        // (It may not conform to best practices, but it is incredibly
+        // useful to have this around.)
+
+        // new self.Project({
+        //   name: 'Test project',
+        //   urgentImportantTaskList: that.taskLists[
+        //     self.names.urgentImportantListId].model,
+        //   urgentNotImportantTaskList: that.taskLists[
+        //     self.names.urgentNotImportantListId].model,
+        //   notUrgentImportantTaskList: that.taskLists[
+        //     self.names.notUrgentImportantListId].model,
+        //   notUrgentNotImportantTaskList: that.taskLists[
+        //     self.names.notUrgentNotImportantListId].model,
+        // }),
+        // new self.Project({
+        //   name: 'Another test project',
+        //   urgentImportantTaskList: new self.TaskListView({
+        //     name: self.names.urgentImportantListId,
+        //     model: new self.TaskCollection([]),
+        //   }).model,
+        //   urgentNotImportantTaskList: new self.TaskListView({
+        //     name: self.names.urgentNotImportantListId,
+        //     model: new self.TaskCollection([]),
+        //   }).model,
+        //   notUrgentImportantTaskList: new self.TaskListView({
+        //     name: self.names.notUrgentImportantListId,
+        //     model: new self.TaskCollection([]),
+        //   }).model,
+        //   notUrgentNotImportantTaskList: new self.TaskListView({
+        //     name: self.names.notUrgentNotImportantListId,
+        //     model: new self.TaskCollection([]),
+        //   }).model,
+        // }),
+        // new self.Project({
+        //   name: '!!! Mega project'
+        // }),
+        // new self.Project({
+        //   name:
+        //   '!!! A project with a very long name just for testin purposes'
+        // }),
+        // new self.Project({
+        //   name: '!!! Super thing'
+        // }),
+
       ]);
       that.projectListView =
         new self.ProjectListView({model: testProjects});
@@ -768,43 +776,43 @@ $(document).ready(function() {
         that.taskLists[self.names.urgentNotImportantListId] = null;
         that.taskLists[self.names.notUrgentImportantListId] = null;
         that.taskLists[self.names.notUrgentNotImportantListId] = null;
+
+        // Add the new views.
+        that.taskLists[self.names.urgentImportantListId] =
+          new self.TaskListView({
+            name: self.names.urgentImportantListId,
+            model: project.attributes.urgentImportantTaskList,
+          });
+        that.taskLists[self.names.urgentNotImportantListId] =
+          new self.TaskListView({
+            name: self.names.urgentNotImportantListId,
+            model: project.attributes.urgentNotImportantTaskList,
+          });
+        that.taskLists[self.names.notUrgentImportantListId] =
+          new self.TaskListView({
+            name: self.names.notUrgentImportantListId,
+            model: project.attributes.notUrgentImportantTaskList,
+          });
+        that.taskLists[self.names.notUrgentNotImportantListId] =
+          new self.TaskListView({
+            name: self.names.notUrgentNotImportantListId,
+            model: project.attributes.notUrgentNotImportantTaskList,
+          });
+
+        // Render the new views
+        var keys = Object.keys(that.taskLists);
+        _.each(keys, function(key) {
+          that.taskLists[key].render();
+        });
+
+        // Set the current project.
+        self.app.setCurrentProject(project);
+
+        // Highlight the project in the project list.
+        self.app.highlightFirstProject();
       } catch(error) {
         // Ignore it.
       }
-
-      // Add the new views.
-      that.taskLists[self.names.urgentImportantListId] =
-        new self.TaskListView({
-          name: self.names.urgentImportantListId,
-          model: project.attributes.urgentImportantTaskList,
-        });
-      that.taskLists[self.names.urgentNotImportantListId] =
-        new self.TaskListView({
-          name: self.names.urgentNotImportantListId,
-          model: project.attributes.urgentNotImportantTaskList,
-        });
-      that.taskLists[self.names.notUrgentImportantListId] =
-        new self.TaskListView({
-          name: self.names.notUrgentImportantListId,
-          model: project.attributes.notUrgentImportantTaskList,
-        });
-      that.taskLists[self.names.notUrgentNotImportantListId] =
-        new self.TaskListView({
-          name: self.names.notUrgentNotImportantListId,
-          model: project.attributes.notUrgentNotImportantTaskList,
-        });
-
-      // Render the new views
-      var keys = Object.keys(that.taskLists);
-      _.each(keys, function(key) {
-        that.taskLists[key].render();
-      });
-
-      // Set the current project.
-      self.app.setCurrentProject(project);
-
-      // Highlight the project in the project list.
-      self.app.highlightFirstProject();
     };
 
     that.removeCurrentProject = function() {
@@ -860,7 +868,6 @@ $(document).ready(function() {
     };
 
     that.saveProjects = function() {
-      window.localStorage.clear();
       window.localStorage.setItem(
         self.names.localStorageProjectsKey,
         JSON.stringify(that.projectListView.model));
@@ -892,7 +899,6 @@ $(document).ready(function() {
     };
 
     that.importData = function(data) {
-
       var keys = Object.keys(that.taskLists);
       _.each(keys, function(key) {
         that.taskLists[key].model.reset([]);
@@ -904,8 +910,18 @@ $(document).ready(function() {
       that.projectListView.render();
 
       var projects = JSON.parse(data);
-      var newProjects = new self.ProjectList([]);
 
+      // Only import data, if there is data, otherwise show the welcome
+      // projects.
+      if (projects == null || !projects.length > 0) {
+        // Import sample data.
+        // (For futue changes: When copying the exported string here, quote
+        // it using single quotes and escape all contained double quotes
+        // with a backslash.)
+	projects = JSON.parse('[{\"name\":\"Intro\",\"urgentImportantTaskList\":[{\"name\":\"1. Click \\"Options\\", then \\"Info\\".\",\"selected\":false},{\"name\":\"2. Drag me to another task list.\",\"selected\":false},{\"name\":\"3. Double click me to rename.\",\"selected\":false},{\"name\":\"4. Remove me by clicking \\"X\\".\",\"selected\":false},{\"name\":\"5. Click \\"Options\\", then \\"Remove current project\\".\",\"selected\":false}],\"notUrgentImportantTaskList\":[],\"urgentNotImportantTaskList\":[],\"notUrgentNotImportantTaskList\":[],\"cid\":\"c16\"},{\"name\":\"Example Project\",\"urgentImportantTaskList\":[{\"name\":\"Call your mom.\",\"selected\":false},{\"name\":\"Send application email.\",\"selected\":true}],\"notUrgentImportantTaskList\":[{\"name\":\"Buy some groceries.\",\"selected\":false},{\"name\":\"Be nice.\",\"selected\":true},{\"name\":\"Eat healthy.\",\"selected\":false},{\"name\":\"Brush your teeth.\",\"selected\":false}],\"urgentNotImportantTaskList\":[{\"name\":\"Clean the gutter.\",\"selected\":false},{\"name\":\"Buy toilet paper.\",\"selected\":true},{\"name\":\"Send party invitations.\",\"selected\":true}],\"notUrgentNotImportantTaskList\":[{\"name\":\"Meet new people.\",\"selected\":false},{\"name\":\"Remove this example project.\",\"selected\":true}],\"cid\":\"c28\"}]');
+      }
+
+      var newProjects = new self.ProjectList([]);
       _.each(projects, function(project) {
         // Urgent + Important
         var newUrgentImportantTaskList = new self.TaskCollection([]);
@@ -961,16 +977,31 @@ $(document).ready(function() {
         new self.ProjectListView({model: newProjects});
       that.projectListView.render();
 
+      // Save the projects
+      that.saveProjects();
+
       // Show the first project.
       var firstProject = that.projectListView.model.models[0]
       that.showProject(firstProject);
       that.setCurrentProject(firstProject);
       that.highlightFirstProject();
     };
+
   };
 
   self.app = new self.App();
   self.app.start();
+
+  // For debugging, clear all `localStorage' data.
+  // Do not remove this line, so you do not forget this!
+  //
+  // window.localStorage.clear();
+
+  // Import data from `localStorage' or  show the welcome projects.
+  self.app.importData(window.localStorage.getItem(
+    self.names.localStorageProjectsKey))
+
+
 
   // Show and highlight the first project in the project list.
   self.app.setCurrentProject(self.app.projectListView.model.models[0]);
@@ -1120,105 +1151,105 @@ $(document).ready(function() {
 \
 \
 <p>\
-  <em>Eisenhower</em>\
-  lets you manage tasks using the\
-  <a href="http://en.wikipedia.org/wiki/Time_management#The_Eisenhower_Method">\
-    Eisenhower method\
-  </a>\
-  .\
+<em>Eisenhower</em>\
+lets you manage tasks using the\
+<a href="http://en.wikipedia.org/wiki/Time_management#The_Eisenhower_Method">\
+Eisenhower method\
+</a>\
+.\
 </p>\
 \
 \
 <hr/>\
 <h3>Projects</h3>\
 <p>\
-  To organize your tasks, you can have multiple\
-  <strong>projects</strong>\
-  . Every project has four task lists associated with it:\
-  <ol>\
-    <li><strong>Urgent + important</strong></li>\
-    <li><strong>Not urgent + important</strong></li>\
-    <li><strong>Urgent + not important</strong></li>\
-    <li><strong>Not urgent + not important</strong></li>\
-  </ol>\
-  To create a project, click\
-  <strong>Add a new project</strong>\
-  and give your new project a name.\
+To organize your tasks, you can have multiple\
+<strong>projects</strong>\
+. Every project has four task lists associated with it:\
+<ol>\
+<li><strong>Urgent + important</strong></li>\
+<li><strong>Not urgent + important</strong></li>\
+<li><strong>Urgent + not important</strong></li>\
+<li><strong>Not urgent + not important</strong></li>\
+</ol>\
+To create a project, click\
+<strong>Add a new project</strong>\
+and give your new project a name.\
 </p>\
 \
 <p>\
-  A project can be renamed by double clicking its name in the project\
-  list.\
+A project can be renamed by double clicking its name in the project\
+list.\
 </p>\
 \
 \
 <hr/>\
 <h3>Tasks</h3>\
 <p>\
-  Every task is assigned to one of the four task lists\
-  <strong>Urgent + important</strong>,\
-  <strong>Not urgent + important</strong>,\
-  <strong>Urgent + not important</strong> or\
-  <strong>Not urgent + not important</strong>\
-  .\
+Every task is assigned to one of the four task lists\
+<strong>Urgent + important</strong>,\
+<strong>Not urgent + important</strong>,\
+<strong>Urgent + not important</strong> or\
+<strong>Not urgent + not important</strong>\
+.\
 </p>\
 \
 <p>\
-  A task can be moved between lists by dragging it from its current\
-  list and dropping it onto a different list. The position of a task \
-  within a list can be changed by drag & drop, too.\
+A task can be moved between lists by dragging it from its current\
+list and dropping it onto a different list. The position of a task \
+within a list can be changed by drag & drop, too.\
 </p>\
 \
 <p>\
-  To create a task, click the\
-  <strong>Add a new task</strong>\
-  text box and give your new project a name. Every new task is added to\
-  the\
-  <strong>Urgent + important</strong>\
-  task list of the current project.\
+To create a task, click the\
+<strong>Add a new task</strong>\
+text box and give your new project a name. Every new task is added to\
+the\
+<strong>Urgent + important</strong>\
+task list of the current project.\
 </p>\
 \
 <p>\
-  To select a task, use its checkbox.\
+To select a task, use its checkbox.\
 </p>\
 \
 <p>\
-  To rename a task, double click its name.\
+To rename a task, double click its name.\
 </p>\
 \
 <p>\
-  To remove a task, click its close button (\
-  <span class="close-button">&times;</span>\
-  ).\
+To remove a task, click its close button (\
+<span class="close-button">&times;</span>\
+).\
 </p>\
 \
 \
 <hr/>\
 <h3>Options</h3>\
 <p>\
-  To access various options, click the\
-  <strong>Options</strong>\
-  button.\
+To access various options, click\
+<strong>Options</strong>\
+.\
 </p>\
 \
 <p>\
-  These are the available options:\
-  <ul>\
-    <li><strong>Remove selected tasks</strong>:\
-      Remove all selected task of the currently active project (\
-      No worries, selected tasks of other projects will not be\
-      removed)</li>\
-    <li><strong>Remove current project</strong>:\
-      Remove the currently active project.</li>\
-    <li><strong>Import</strong>:\
-      Import projects data.</li>\
-    <li><strong>Export</strong>:\
-      Export the data for all projects; this data can be imported using\
-     the\
-      <strong>Import</strong> option.</li>\
-    <li><strong>Info</strong>:\
-      Shows this info.</li>\
-  </ul>\
+These are the available options:\
+<ul>\
+<li><strong>Remove selected tasks</strong>:\
+Remove all selected task of the currently active project (\
+No worries, selected tasks of other projects will not be\
+removed)</li>\
+<li><strong>Remove current project</strong>:\
+Remove the currently active project.</li>\
+<li><strong>Import</strong>:\
+Import projects data.</li>\
+<li><strong>Export</strong>:\
+Export the data for all projects; this data can be imported using\
+the\
+<strong>Import</strong> option.</li>\
+<li><strong>Info</strong>:\
+Shows this info.</li>\
+</ul>\
 \
 </p>\
 \
@@ -1226,8 +1257,8 @@ $(document).ready(function() {
 <hr/>\
 <h3>Saving</h3>\
 <p>\
-  <em>Eisenhower</em> automatically saves every action you perform.\
-  Manual saving is not required.\
+<em>Eisenhower</em> automatically saves every action you perform.\
+Manual saving is not required.\
 </p>\
 \
 <hr/>\
@@ -1383,7 +1414,7 @@ $(document).ready(function() {
         '<div class="info-modal-backdrop"></div>' +
 
       '<div class="info-modal-body">' +
-	'<a href="#" class="info-modal-close-button">&times;</a>' +
+        '<a href="#" class="info-modal-close-button">&times;</a>' +
         html +
       '</div>'+
 
@@ -1432,8 +1463,8 @@ $(document).ready(function() {
 
     $('.info-modal-close-button').mouseover(function() {
       $(this).css({
-	'opacity': '0.8',
-	'text-decoration': 'none',
+        'opacity': '0.8',
+        'text-decoration': 'none',
       });
     });
 
@@ -1447,7 +1478,7 @@ $(document).ready(function() {
 
     var hideInfoModal = function() {
       $(infoBox).fadeOut(function() {
-	$(this).remove('fast');
+        $(this).remove('fast');
       });
     };
 
