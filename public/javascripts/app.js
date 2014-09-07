@@ -311,8 +311,12 @@ $(document).ready(function() {
 
           saveButton.click(function() {
             var newDescription = textarea.val();
-            that.setDescription(newDescription);
-            taskDescription.html(newDescription);
+	    // Only save, if the new description is not blank
+	    // (whitespace-only counts as blank).
+	    if (!/^\s*$/.test(newDescription)) {
+              that.setDescription(newDescription);
+              taskDescription.html(newDescription);
+	    }
             editPanel.slideUp('fast');
             nonEditable.slideDown('fast');
             editButton.html('Edit');
