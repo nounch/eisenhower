@@ -177,10 +177,10 @@ hr .invisible {
 }
 
 .task-info-button {
-  background-color: #919191;
-  color: #FEFEFD;
+  background-color: #DEDEDE;
+  color: #919191;
   border: none;
-  border-radius: 100px;
+  border-radius: 3px;
   font-size: 13px;
   font-weight: bold;
   width: 18px;
