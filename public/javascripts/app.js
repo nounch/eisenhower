@@ -1257,22 +1257,22 @@ Eisenhower method\
 <hr/>\
 <h3>Projects</h3>\
 <p>\
-To organize your tasks, you can have multiple\
+To organize your tasks, you can have multiple \
 <strong>projects</strong>\
-. Every project has four task lists associated with it:\
+. Every project has four task lists:\
 <ol>\
 <li><strong>Urgent + important</strong></li>\
 <li><strong>Not urgent + important</strong></li>\
 <li><strong>Urgent + not important</strong></li>\
 <li><strong>Not urgent + not important</strong></li>\
 </ol>\
-To create a project, click\
-<strong>Add a new project</strong>\
+To create a project, click \
+<strong>Add a new project</strong> \
 and give your new project a name.\
 </p>\
 \
 <p>\
-A project can be renamed by double clicking its name in the project\
+A project can be renamed by double clicking its name in the project \
 list.\
 </p>\
 \
@@ -1280,10 +1280,10 @@ list.\
 <hr/>\
 <h3>Tasks</h3>\
 <p>\
-Every task is assigned to one of the four task lists\
-<strong>Urgent + important</strong>,\
-<strong>Not urgent + important</strong>,\
-<strong>Urgent + not important</strong> or\
+Every task is assigned to one of the four task lists \
+<strong>Urgent + important</strong>, \
+<strong>Not urgent + important</strong>, \
+<strong>Urgent + not important</strong> or \
 <strong>Not urgent + not important</strong>\
 .\
 </p>\
@@ -1295,11 +1295,11 @@ within a list can be changed by drag & drop, too.\
 </p>\
 \
 <p>\
-To create a task, click the\
+To create a task, click the \
 <strong>Add a new task</strong>\
-text box and give your new project a name. Every new task is added to\
-the\
-<strong>Urgent + important</strong>\
+text box and give your new project a name. Every new task is added to \
+the \
+<strong>Urgent + important</strong> \
 task list of the current project.\
 </p>\
 \
@@ -1321,27 +1321,27 @@ To remove a task, click its close button (\
 <hr/>\
 <h3>Options</h3>\
 <p>\
-To access various options, click\
+To access various options, click \
 <strong>Options</strong>\
 .\
 </p>\
 \
 <p>\
-These are the available options:\
+These are the available options: \
 <ul>\
-<li><strong>Remove selected tasks</strong>:\
+<li><strong>Remove selected tasks</strong>: \
 Remove all selected task of the currently active project (\
-No worries, selected tasks of other projects will not be\
+No worries, selected tasks of other projects will not be \
 removed)</li>\
-<li><strong>Remove current project</strong>:\
+<li><strong>Remove current project</strong>: \
 Remove the currently active project.</li>\
-<li><strong>Import</strong>:\
+<li><strong>Import</strong>: \
 Import projects data.</li>\
-<li><strong>Export</strong>:\
+<li><strong>Export</strong>: \
 Export the data for all projects; this data can be imported using\
-the\
+the \
 <strong>Import</strong> option.</li>\
-<li><strong>Info</strong>:\
+<li><strong>Info</strong>: \
 Shows this info.</li>\
 </ul>\
 \
