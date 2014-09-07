@@ -394,23 +394,11 @@ $(document).ready(function() {
           self.app.trigger('remove:task', that.model.cid);
         },
       });
-
-      // Animate the element.
-      // that.$el.animate({
-      //   'opacity': '0.001',
-      // }, 'fast', function() {
-      //   that.$el.slideUp(function() {
-      //     // Actually remove the element.
-      //     that.$el.remove();
-      //   });
-      // });
-      // self.app.trigger('remove:task', this.model.cid);
-
     },
     toggleSelected: function() {
-      console.log('------------------------------');  // DEBUG
       this.model.set({selected: !this.model.get('selected')})
       self.app.saveProjects();
+      this.rerender();
     },
     template: function(data) {
       return _.template($('#' + self.names.taskViewTemplateId)

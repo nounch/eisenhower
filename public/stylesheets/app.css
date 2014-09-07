@@ -146,7 +146,6 @@ hr .invisible {
   white-space: nowrap;
   margin-right: 35px;
 }
-
 .task-text-box {
   height: 30px;
   margin-left: 5px;
@@ -438,4 +437,56 @@ hr .invisible {
   display: inline-block;
   text-align: center;
   margin: 10px;
+}
+
+
+/**************************************************************************
+ * Checkbox
+ *************************************************************************/
+
+.task-selection-toggle {
+  width: 25px;
+  margin-top: 2px;
+  margin-left: -3px;
+  position: relative;
+}
+
+.task-selection-toggle label {
+  cursor: pointer;
+  position: absolute;
+  width: 25px;
+  height: 25px;
+  top: 0;
+  left: 0;
+  background-color: #F8F8F9;
+  border:1px solid #DEDEDE;
+}
+
+.task-selection-toggle label:after {
+  opacity: 0.1;
+  content: '';
+  position: absolute;
+  width: 9px;
+  height: 5px;
+  background: transparent;
+  top: 6px;
+  left: 7px;
+  border: 3px solid #333333;
+  border-top: none;
+  border-right: none;
+  margin-top: 2px;
+
+  -webkit-transform: rotate(-45deg);
+  -moz-transform: rotate(-45deg);
+  -o-transform: rotate(-45deg);
+  -ms-transform: rotate(-45deg);
+  transform: rotate(-45deg);
+}
+
+.task-selection-toggle label:hover::after {
+  opacity: 0.5;
+}
+
+.task-selection-toggle input[type=checkbox]:checked + label:after {
+  opacity: 0.8;
 }

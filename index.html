@@ -116,7 +116,10 @@
     <script type="text/javascript" src="public/javascripts/app.js"></script>
 
     <script type="text/template" id="task-view-template">
-      <div class="pull-left task-selection-toggle"><input type="checkbox" <% if(selected) { %><%- 'checked=""' %><% } %>/></div>
+      <div class="pull-left task-selection-toggle">
+	<input type="checkbox" name="task-selection-toggle-input" <% if(selected) { %><%- 'checked=""' %><% } %>/>
+	<label for="task-selection-toggle-input"></label>
+      </div>
       <div class="task-non-editable">
         <div class="task-name" title="<%- name %>"><%- name %></div>
 	<button type="button" class="pull-right task-info-button">?</button>
