@@ -1523,6 +1523,7 @@ Manual saving is not required.\
   //
   // Returns nothing.
   self.infoBox = function(element, options) {
+    var options = options || {};
     var onShow = options['show'] || function() { /* Do nothing. */ };
     var onHide = options['hide'] || function() { /* Do nothing. */ };
     if (typeof element == 'string') {
