@@ -15,9 +15,12 @@ $(document).ready(function() {
     taskViewTemplateId: 'task-view-template',
     taskListViewTemplateId: 'task-list-view-template',
     projectListItemTemplateId: 'project-list-item-template',
+    taskViewInfoTemplateId: 'task-view-info-template',
 
     taskViewClass: 'task-view',
     taskViewDataAttributeTaskId: 'data-task-id',
+    taskViewInfoBoxAnchorClass: 'task-view-info-box-anchor',
+    taskViewInfoBoxContentClass: 'task-view-info-box-content',
     taskListViewClass: 'task-list-view',
     projectListViewId: 'project-list-view',
     projectListViewAnchorId: 'projects-list-anchor',
@@ -28,6 +31,13 @@ $(document).ready(function() {
     taskSelectionToggleClass: 'task-selection-toggle',
     taskBoxClass: 'task-box',
     taskNameClass: 'task-name',
+    taskDescriptionTextareaClass: 'task-description-textarea',
+    taskDescriptionNonEditableClass: 'task-description-non-editable',
+    taskDescriptionClass: 'task-description',
+    taskDescriptionEditButtonClass: 'task-description-edit-button',
+    taskDescriptionEditPanelClass: 'task-description-edit-panel',
+    taskDescriptionCancelButtonClass: 'task-description-cancel-button',
+    taskDescriptionSaveButtonClass: 'task-description-save-button',
     taskNonEditableClass: 'task-non-editable',
     taskTextBoxClass: 'task-text-box',
 
@@ -39,6 +49,7 @@ $(document).ready(function() {
     draggedElementClass: 'currently-dragged-element',
 
     removeTaskButtonClass: 'remove-task-button',
+    taskInfoButton: 'task-info-button',
     removeSelectedButtonClass: 'remove-selected-button',
 
     removeCurrentProjectButtonClass: 'remove-current-project-button',
@@ -179,6 +190,7 @@ $(document).ready(function() {
   self.Task = Backbone.Model.extend({
     defaults: {
       name: '',
+      description: '',
       selected: false,
     },
     localStorage: new Backbone.LocalStorage('task'),
@@ -231,6 +243,7 @@ $(document).ready(function() {
   self.TaskView = Backbone.View.extend({
     tagName: 'div',
     className: self.names.taskViewClass,
+    infoBoxElement: null,
     initialize: function(options) {
       var that = this;
 
@@ -244,6 +257,8 @@ $(document).ready(function() {
         'toggleSelected';
       this.events['keyup .' + self.names.taskTextBoxClass] =
         'changeName';
+      this.events['click .' + self.names.taskInfoButton] =
+        'showInfo';
 
       // Remove if all projects are remove.
       this.listenTo(self.app, 'remove:all-projects', function() {
@@ -256,6 +271,69 @@ $(document).ready(function() {
     events: {
       'drop': 'drop',
       'dblclick': 'edit',
+      'mouseover': 'showInfoButton',
+      'mouseout': 'hideInfoButton',
+    },
+    showInfo: function(e) {
+      var that = this;
+      var html = this.infoTemplate(this.model);
+      var element = $(html);
+      self.infoBox(element, {
+        show: function(elm) {
+          var nonEditable = elm.find(
+            '.' + self.names.taskDescriptionNonEditableClass);
+          var taskDescription = elm.find(
+            '.' + self.names.taskDescriptionClass);
+          var editButton = elm.find(
+            '.' + self.names.taskDescriptionEditButtonClass);
+          var editPanel = elm.find(
+            '.' + self.names.taskDescriptionEditPanelClass);
+          var cancelButton = elm.find(
+            '.' + self.names.taskDescriptionCancelButtonClass);
+          var saveButton = elm.find(
+            '.' + self.names.taskDescriptionSaveButtonClass);
+          var textarea = elm.find(
+            '.' + self.names.taskDescriptionTextareaClass);
+
+          editButton.click(function() {
+            // Reset the `textarea' text in case it has been edited, but
+            // canceled (browsers tend to cache the text value).
+            textarea.val(that.model.get('description'));
+
+            nonEditable.slideUp('fast');
+            editPanel.slideDown('fast');
+          });
+
+          cancelButton.click(function() {
+            editPanel.slideUp('fast');
+            nonEditable.slideDown('fast');
+          });
+
+          saveButton.click(function() {
+            var newDescription = textarea.val();
+            that.setDescription(newDescription);
+            taskDescription.html(newDescription);
+            editPanel.slideUp('fast');
+            nonEditable.slideDown('fast');
+            editButton.html('Edit');
+          });
+
+        },
+      });
+    },
+    showInfoButton: function(e) {
+      this.$el.find('.' + self.names.taskInfoButton).show();
+    },
+    hideInfoButton: function(e) {
+      this.$el.find('.' + self.names.taskInfoButton).hide();
+    },
+    infoTemplate: function(data) {
+      return _.template($('#' + self.names.taskViewInfoTemplateId)
+                        .html(), data.toJSON());
+    },
+    setDescription: function(description) {
+      this.model.set({description: description});
+      self.app.saveProjects();
     },
     edit: function(e) {
       var that = this;
@@ -295,18 +373,38 @@ $(document).ready(function() {
     },
     removeThisTask: function() {
       var that = this;
-      // Animate the element.
-      this.$el.animate({
-        'opacity': '0.001',
-      }, 'fast', function() {
-        that.$el.slideUp(function() {
-          // Actually remove the element.
-          that.$el.remove();
-        });
+      self.confirmationDialog({
+        text: 'Do you really want to remove this task?',
+        yes: 'Yes',
+        no: 'No',
+        action: function() {
+          // Animate the element.
+          that.$el.animate({
+            'opacity': '0.001',
+          }, 'fast', function() {
+            that.$el.slideUp(function() {
+              // Actually remove the element.
+              that.$el.remove();
+            });
+          });
+          self.app.trigger('remove:task', that.model.cid);
+        },
       });
-      self.app.trigger('remove:task', this.model.cid);
+
+      // Animate the element.
+      // that.$el.animate({
+      //   'opacity': '0.001',
+      // }, 'fast', function() {
+      //   that.$el.slideUp(function() {
+      //     // Actually remove the element.
+      //     that.$el.remove();
+      //   });
+      // });
+      // self.app.trigger('remove:task', this.model.cid);
+
     },
     toggleSelected: function() {
+      console.log('------------------------------');  // DEBUG
       this.model.set({selected: !this.model.get('selected')})
       self.app.saveProjects();
     },
@@ -918,7 +1016,7 @@ $(document).ready(function() {
         // (For futue changes: When copying the exported string here, quote
         // it using single quotes and escape all contained double quotes
         // with a backslash.)
-	projects = JSON.parse('[{\"name\":\"Intro\",\"urgentImportantTaskList\":[{\"name\":\"1. Click \\"Options\\", then \\"Info\\".\",\"selected\":false},{\"name\":\"2. Drag me to another task list.\",\"selected\":false},{\"name\":\"3. Double click me to rename.\",\"selected\":false},{\"name\":\"4. Remove me by clicking \\"X\\".\",\"selected\":false},{\"name\":\"5. Click \\"Options\\", then \\"Remove current project\\".\",\"selected\":false}],\"notUrgentImportantTaskList\":[],\"urgentNotImportantTaskList\":[],\"notUrgentNotImportantTaskList\":[],\"cid\":\"c16\"},{\"name\":\"Example Project\",\"urgentImportantTaskList\":[{\"name\":\"Call your mom.\",\"selected\":false},{\"name\":\"Send application email.\",\"selected\":true}],\"notUrgentImportantTaskList\":[{\"name\":\"Buy some groceries.\",\"selected\":false},{\"name\":\"Be nice.\",\"selected\":true},{\"name\":\"Eat healthy.\",\"selected\":false},{\"name\":\"Brush your teeth.\",\"selected\":false}],\"urgentNotImportantTaskList\":[{\"name\":\"Clean the gutter.\",\"selected\":false},{\"name\":\"Buy toilet paper.\",\"selected\":true},{\"name\":\"Send party invitations.\",\"selected\":true}],\"notUrgentNotImportantTaskList\":[{\"name\":\"Meet new people.\",\"selected\":false},{\"name\":\"Remove this example project.\",\"selected\":true}],\"cid\":\"c28\"}]');
+        projects = JSON.parse('[{\"name\":\"Intro\",\"urgentImportantTaskList\":[{\"name\":\"1. Click \\"Options\\", then \\"Info\\".\",\"selected\":false},{\"name\":\"2. Drag me to another task list.\",\"selected\":false},{\"name\":\"3. Double click me to rename.\",\"selected\":false},{\"name\":\"4. Remove me by clicking \\"X\\".\",\"selected\":false},{\"name\":\"5. Click \\"Options\\", then \\"Remove current project\\".\",\"selected\":false}],\"notUrgentImportantTaskList\":[],\"urgentNotImportantTaskList\":[],\"notUrgentNotImportantTaskList\":[],\"cid\":\"c16\"},{\"name\":\"Example Project\",\"urgentImportantTaskList\":[{\"name\":\"Call your mom.\",\"selected\":false},{\"name\":\"Send application email.\",\"selected\":true}],\"notUrgentImportantTaskList\":[{\"name\":\"Buy some groceries.\",\"selected\":false},{\"name\":\"Be nice.\",\"selected\":true},{\"name\":\"Eat healthy.\",\"selected\":false},{\"name\":\"Brush your teeth.\",\"selected\":false}],\"urgentNotImportantTaskList\":[{\"name\":\"Clean the gutter.\",\"selected\":false},{\"name\":\"Buy toilet paper.\",\"selected\":true},{\"name\":\"Send party invitations.\",\"selected\":true}],\"notUrgentNotImportantTaskList\":[{\"name\":\"Meet new people.\",\"selected\":false},{\"name\":\"Remove this example project.\",\"selected\":true}],\"cid\":\"c28\"}]');
       }
 
       var newProjects = new self.ProjectList([]);
@@ -928,6 +1026,7 @@ $(document).ready(function() {
         _.each(project.urgentImportantTaskList, function(task) {
           var newTask = new self.Task({
             name: task.name,
+            description: task.description,
             selected: task.selected,
           });
           newUrgentImportantTaskList.add(newTask);
@@ -938,6 +1037,7 @@ $(document).ready(function() {
         _.each(project.notUrgentImportantTaskList, function(task) {
           var newTask = new self.Task({
             name: task.name,
+            description: task.description,
             selected: task.selected,
           });
           newNotUrgentImportantTaskList.add(newTask);
@@ -948,6 +1048,7 @@ $(document).ready(function() {
         _.each(project.urgentNotImportantTaskList, function(task) {
           var newTask = new self.Task({
             name: task.name,
+            description: task.description,
             selected: task.selected,
           });
           newUrgentNotImportantTaskList.add(newTask);
@@ -958,6 +1059,7 @@ $(document).ready(function() {
         _.each(project.notUrgentNotImportantTaskList, function(task) {
           var newTask = new self.Task({
             name: task.name,
+            description: task.description,
             selected: task.selected,
           });
           newNotUrgentNotImportantTaskList.add(newTask);
@@ -1408,23 +1510,51 @@ Manual saving is not required.\
   // Info Box
   //=======================================================================
 
-  self.infoBox = function(html) {
+  // Show a info modal with the specified content.
+  //
+  // element - The jQuery element or HTML string that should become the
+  //           content of the modal.
+  // options - Callbacks to be performed after insertion or after removal
+  //           of the modal (`show': called after insertion; `hide':
+  //           called after removal).
+  //
+  // Example
+  //
+  //   self.infoBox($('<p>This is some info.</p>', {
+  //     show: function() {
+  //       console.log('Info box inserted.');
+  //     },
+  //     hide: function() {
+  //       console.log('Info box hidden.');
+  //     }
+  //   })
+  //
+  // Returns nothing.
+  self.infoBox = function(element, options) {
+    var onShow = options['show'] || function() { /* Do nothing. */ };
+    var onHide = options['hide'] || function() { /* Do nothing. */ };
+    if (typeof element == 'string') {
+      element = $(element);
+    }
+
     var infoBox = $(
       '<div class="info-modal-box">' +
         '<div class="info-modal-backdrop"></div>' +
 
       '<div class="info-modal-body">' +
         '<a href="#" class="info-modal-close-button">&times;</a>' +
-        html +
+      '<div class="info-modal-body-content"></div>' +
       '</div>'+
 
       '</div>'
     );
+    // Actually append the content.
+    infoBox.find('.info-modal-body-content').append(element)
 
-    // Append the element.
-    $('body').append($(infoBox).hide().fadeIn());
-
-    infoBox
+    $('body').append($(infoBox).hide());
+    infoBox.fadeIn(function() {
+      onShow($(this));
+    });
 
     $('.info-modal-box').css({
       'position': 'absolute',
@@ -1444,6 +1574,10 @@ Manual saving is not required.\
       'overflow': 'auto',
     });
 
+    $('.info-modal-body-content').css({
+      'margin-top': '30px',
+    });
+
     $('.info-modal-backdrop').css({
       'position': 'fixed',
       'top': '0',
@@ -1459,6 +1593,7 @@ Manual saving is not required.\
       'color': '#57534A',
       'font-size': '25px',
       'font-weight': 'bold',
+      'margin-top': '-15px',
     });
 
     $('.info-modal-close-button').mouseover(function() {
@@ -1479,6 +1614,7 @@ Manual saving is not required.\
     var hideInfoModal = function() {
       $(infoBox).fadeOut(function() {
         $(this).remove('fast');
+        onHide();
       });
     };
 

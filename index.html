@@ -119,9 +119,14 @@
       <div class="pull-left task-selection-toggle"><input type="checkbox" <% if(selected) { %><%- 'checked=""' %><% } %>/></div>
       <div class="task-non-editable">
         <div class="task-name" title="<%- name %>"><%- name %></div>
-	<button type="button" class="pull-right remove-task-button">&times;</button>
+	<button type="button" class="pull-right task-info-button">?</button>
+	<div class="">
+	  <button type="button" class="pull-right remove-task-button">&times;</button>
+	</div>
       </div>
+
       <input type="text" class="task-text-box collapse" value="<%- name %>" />
+      <div class="task-view-info-box-anchor collapse"></div>
     </script>
 
     <script type="text/template" id="task-list-view-template">
@@ -135,6 +140,24 @@
       <input type="text" class="project-text-box collapse" value="<%- project.name %>" />
     </script>
 
+    <script type="text/template" id="task-view-info-template">
+      <h2><% if (selected) { %><span class="text-muted checkmark">&#x2713;</span><% } %><%- name %></h2>
+      <div class="task-description-non-editable">
+	<pre class="task-description"><% if(description.length > 0) { %><%- description %><% } else { %><em>There is no description yet.</em><% } %></pre>
+	<p class="text-right">
+	  <button type="button" class="btn btn-link button-mute task-description-edit-button"><% if(description.length > 0) { %><%- "Edit" %><% } else { %><%- "Add description" %><% } %></button>
+	</p>
+      </div>
+      <div class="task-description-edit-panel collapse">
+	<textarea class="form-control task-description-textarea" rows="10" cols="100"><%- description %></textarea>
+	<hr class="invisible" />
+	<div class="text-center">
+	  <button type="button" class="btn btn-link button-mute task-description-cancel-button">Cancel</button>
+	  <button type="button" class="btn btn-primary button-primary task-description-save-button">Save</button>
+	</div>
+	<hr class="invisible" />
+      </div>
+    </script>
 
   </body>
 </html>
