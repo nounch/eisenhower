@@ -177,7 +177,7 @@ hr .invisible {
 }
 
 .task-info-button {
-  background-color: #DEDEDE;
+  background-color: rgba(255, 255, 255, 0.0);
   color: #919191;
   border: none;
   border-radius: 3px;
@@ -185,10 +185,36 @@ hr .invisible {
   font-weight: bold;
   width: 18px;
   height: 18px;
-  margin-top: -35px;
+  width: 27px;
+  height: 27px;
+  margin-top: -39px;
   margin-right: 18px;
   text-align: center;
   display: none;
+  transition: background-color 120ms ease-out;
+}
+
+.task-has-description-indicator {
+  background-color: rgba(255, 255, 255, 0.0);
+  color: #CDCDCD;
+  border: none;
+  border-radius: 3px;
+  font-size: 13px;
+  font-weight: bold;
+  width: 18px;
+  height: 18px;
+  width: 27px;
+  height: 27px;
+  margin-top: -39px;
+  margin-right: 18px;
+  text-align: center;
+  display: none;
+  transition: background-color 120ms ease-out;
+}
+
+.task-info-button:hover {
+  background-color: #DEDEDE;
+  transition: background-color 120ms ease-out;
 }
 
 .remove-task-button:hover {
@@ -374,7 +400,7 @@ hr .invisible {
 
 .drop-menu-body {
   position: absolute;
-  z-index: 9997;
+  z-index: 9996;
   display: none;
   background-color: #FEFEFD;
   padding: 10px;
@@ -428,6 +454,10 @@ hr .invisible {
   padding: 10px;
 }
 
+.task-description-name {
+  padding-left: 10px;
+}
+
 .checkmark {
   background-color: #CDCDCD;
   color: #FEFEFD;
@@ -439,6 +469,15 @@ hr .invisible {
   margin: 10px;
 }
 
+.date-element {
+  padding: 10px;
+  margin-bottom: 10px;
+  display: inline-block;
+}
+
+.task-description-remove-button:hover {
+  color: #AF1212;
+}
 
 /**************************************************************************
  * Checkbox
@@ -458,8 +497,7 @@ hr .invisible {
   height: 25px;
   top: 0;
   left: 0;
-  background-color: #F8F8F9;
-  border:1px solid #DEDEDE;
+  background-color: #FEFEFD;
 }
 
 .task-selection-toggle label:after {

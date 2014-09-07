@@ -24,7 +24,7 @@
             <button type="button" class="btn btn-link btn-xs options-button drop-menu-button">Options</button>
             <div class="drop-menu-body">
               <button type="button" class="btn btn-link btn-sm remove-selected-button" title="Remove all selected tasks">&times; Remove selected tasks</button>
-              <button type="button" class="btn btn-link btn-sm remove-current-project-button">&times; Remove current project</button>
+              <button type="button" class="btn btn-link btn-sm remove-current-project-button" title="Remove current project">&times; Remove current project</button>
               <button type="button" class="btn btn-link btn-sm import-data-button">Import</button>
               <button type="button" class="btn btn-link btn-sm export-data-button">Export</button>
 	      <div class="drop-menu-separator"></div>
@@ -122,6 +122,7 @@
       </div>
       <div class="task-non-editable">
         <div class="task-name" title="<%- name %>"><%- name %></div>
+	<button type="button" class="pull-right task-has-description-indicator">?</button>
 	<button type="button" class="pull-right task-info-button">?</button>
 	<div class="">
 	  <button type="button" class="pull-right remove-task-button">&times;</button>
@@ -144,10 +145,12 @@
     </script>
 
     <script type="text/template" id="task-view-info-template">
-      <h2><% if (selected) { %><span class="text-muted checkmark">&#x2713;</span><% } %><%- name %></h2>
+      <h2 class="task-description-name"><% if (selected) { %><span class="text-muted checkmark">&#x2713;</span><% } %><%- name %></h2>
+      <span class="text-muted date-element"><%- new Date(parseInt(created)).toDateString() %></span>
       <div class="task-description-non-editable">
-	<pre class="task-description"><% if(description.length > 0) { %><%- description %><% } else { %><em>There is no description yet.</em><% } %></pre>
+	<pre class="task-description"><% if(description.length > 0) { %><%- description %><% } else { %><hr class="invisible" /><p class="text-center"><em class="text-muted">There is no description yet.</em><hr class="invisible" /></p><% } %></pre>
 	<p class="text-right">
+	  <button type="button" class="btn btn-link button-mute task-description-remove-button">Remove</button>
 	  <button type="button" class="btn btn-link button-mute task-description-edit-button"><% if(description.length > 0) { %><%- "Edit" %><% } else { %><%- "Add description" %><% } %></button>
 	</p>
       </div>

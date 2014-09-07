@@ -35,6 +35,7 @@ $(document).ready(function() {
     taskDescriptionNonEditableClass: 'task-description-non-editable',
     taskDescriptionClass: 'task-description',
     taskDescriptionEditButtonClass: 'task-description-edit-button',
+    taskDescriptionRemoveButtonClass: 'task-description-remove-button',
     taskDescriptionEditPanelClass: 'task-description-edit-panel',
     taskDescriptionCancelButtonClass: 'task-description-cancel-button',
     taskDescriptionSaveButtonClass: 'task-description-save-button',
@@ -50,6 +51,7 @@ $(document).ready(function() {
 
     removeTaskButtonClass: 'remove-task-button',
     taskInfoButton: 'task-info-button',
+    taskHasDescriptionIndicatorClass: 'task-has-description-indicator',
     removeSelectedButtonClass: 'remove-selected-button',
 
     removeCurrentProjectButtonClass: 'remove-current-project-button',
@@ -191,6 +193,7 @@ $(document).ready(function() {
     defaults: {
       name: '',
       description: '',
+      created: '' + Date.now(),
       selected: false,
     },
     localStorage: new Backbone.LocalStorage('task'),
@@ -267,12 +270,40 @@ $(document).ready(function() {
 
       this.$el.attr(self.names.taskViewDataAttributeTaskId,
                     this.model.cid);
+
+      // Styling: Make buttons etc. have the same background/color as the
+      // surrounding.
+      this.$el.hover(function(e) {
+        $(this)
+          .find('.' + self.names.taskSelectionToggleClass + ' label').css({
+            'background-color': '#F8F8F9',
+          });
+        $(this)
+          .find('.' + self.names.taskInfoButton + ' label').css({
+            'background-color': '#F8F8F9',
+          });
+      }, function(e) {
+        $(this).
+          find('.' + self.names.taskSelectionToggleClass + ' label').css({
+            'background-color': '#FEFEFD',
+          });
+        $(this)
+          .find('.' + self.names.taskInfoButton + ' label').css({
+            'background-color': '#FEFEFD',
+          });
+      });
     },
     events: {
       'drop': 'drop',
       'dblclick': 'edit',
       'mouseover': 'showInfoButton',
       'mouseout': 'hideInfoButton',
+    },
+    style: function() {
+      if (this.model.get('description').length > 0) {
+        this.$el.find('.' + self.names.taskHasDescriptionIndicatorClass)
+	  .show();
+      }
     },
     showInfo: function(e) {
       var that = this;
@@ -286,6 +317,8 @@ $(document).ready(function() {
             '.' + self.names.taskDescriptionClass);
           var editButton = elm.find(
             '.' + self.names.taskDescriptionEditButtonClass);
+          var removeButton = elm.find(
+            '.' + self.names.taskDescriptionRemoveButtonClass);
           var editPanel = elm.find(
             '.' + self.names.taskDescriptionEditPanelClass);
           var cancelButton = elm.find(
@@ -295,13 +328,29 @@ $(document).ready(function() {
           var textarea = elm.find(
             '.' + self.names.taskDescriptionTextareaClass);
 
+
+          removeButton.click(function() {
+            self.confirmationDialog({
+              text: 'Do you really want to remove the desscription for \
+this task?',
+              yes: 'Yes',
+              no: 'No',
+              action: function() {
+                taskDescription.html('');
+                that.removeDescription()
+              },
+              animation: 'no',
+            });
+
+          });
+
           editButton.click(function() {
             // Reset the `textarea' text in case it has been edited, but
             // canceled (browsers tend to cache the text value).
             textarea.val(that.model.get('description'));
 
             nonEditable.slideUp('fast');
-            editPanel.slideDown('fast');
+            editPanel.slideDown('fast', function() { textarea.focus(); });
           });
 
           cancelButton.click(function() {
@@ -311,18 +360,21 @@ $(document).ready(function() {
 
           saveButton.click(function() {
             var newDescription = textarea.val();
-	    // Only save, if the new description is not blank
-	    // (whitespace-only counts as blank).
-	    if (!/^\s*$/.test(newDescription)) {
+            // Only save, if the new description is not blank
+            // (whitespace-only counts as blank).
+            if (!/^\s*$/.test(newDescription)) {
               that.setDescription(newDescription);
               taskDescription.html(newDescription);
-	    }
+            }
             editPanel.slideUp('fast');
             nonEditable.slideDown('fast');
             editButton.html('Edit');
           });
 
         },
+	hide: function() {
+	  that.rerender();
+	},
       });
     },
     showInfoButton: function(e) {
@@ -337,6 +389,10 @@ $(document).ready(function() {
     },
     setDescription: function(description) {
       this.model.set({description: description});
+      self.app.saveProjects();
+    },
+    removeDescription: function(description) {
+      this.model.set({description: ''});
       self.app.saveProjects();
     },
     edit: function(e) {
@@ -406,12 +462,14 @@ $(document).ready(function() {
     },
     rerender: function() {
       this.$el.html(this.template(this.model));
+      this.style();
     },
     render: function() {
       this.$el.html(this.template(this.model));
       if (this.element) {  // Be extra-cautious.
         this.element.append(this.$el);
       }
+      this.style();
       return this;
     },
   });
@@ -680,7 +738,7 @@ $(document).ready(function() {
         });
       that.taskLists[self.names.notUrgentNotImportantListId].render();
 
-      // Make the input field generate new models.
+      // Make the task input field generate new models.
       $('#' + self.names.newTaskInputId).keypress(function(e) {
         if (e.which == 13) {
           e.preventDefault();
@@ -694,6 +752,7 @@ $(document).ready(function() {
             } else {
               var newModel = new self.Task({
                 name: value,
+                created: '' + Date.now(),
               });
               that.taskLists[self.names.urgentImportantListId].model
                 .unshift(newModel);
@@ -961,10 +1020,12 @@ $(document).ready(function() {
       window.localStorage.setItem(
         self.names.localStorageProjectsKey,
         JSON.stringify(that.projectListView.model));
-      console.log(Date.now());  // DEBUG
-      console.log(window.localStorage.getItem(self.names.localStorageProjectsKey));  // DEBUG
 
-      // console.log(that.projectListView.model);  // DEBUG
+      // For debugging, print all save actions.
+      // (Do not remove this code!)
+      //
+      // console.log(Date.now());
+      // console.log(window.localStorage.getItem(self.names.localStorageProjectsKey));
     };
 
     that.exportData = function() {
@@ -1019,6 +1080,7 @@ $(document).ready(function() {
           var newTask = new self.Task({
             name: task.name,
             description: task.description,
+            created: task.date,
             selected: task.selected,
           });
           newUrgentImportantTaskList.add(newTask);
@@ -1030,6 +1092,7 @@ $(document).ready(function() {
           var newTask = new self.Task({
             name: task.name,
             description: task.description,
+            created: task.date,
             selected: task.selected,
           });
           newNotUrgentImportantTaskList.add(newTask);
@@ -1041,6 +1104,7 @@ $(document).ready(function() {
           var newTask = new self.Task({
             name: task.name,
             description: task.description,
+            created: task.date,
             selected: task.selected,
           });
           newUrgentNotImportantTaskList.add(newTask);
@@ -1052,6 +1116,7 @@ $(document).ready(function() {
           var newTask = new self.Task({
             name: task.name,
             description: task.description,
+            created: task.date,
             selected: task.selected,
           });
           newNotUrgentNotImportantTaskList.add(newTask);
@@ -1369,6 +1434,7 @@ Manual saving is not required.\
     var yes = options['yes'] || 'Yes';
     var no = options['no'] || 'No';
     var action = options['action'] || function() { /* Do nothing. */ };
+    var animation = options['animation'] || 'yes';
 
     var dialog = $(
       '<div class="confirmation-dialog">' +
@@ -1394,12 +1460,9 @@ Manual saving is not required.\
       '</div>'
     );
 
-    // Append the element.
-    $('body').append($(dialog).hide().fadeIn());
-
     // Styling
 
-    $('.confirmation-dialog-body').css({
+    $(dialog).find('.confirmation-dialog-body').css({
       'position': 'fixed',
       'width': '280px',
       'height': '180px',
@@ -1416,16 +1479,16 @@ Manual saving is not required.\
       'text-align': 'center',
     });
 
-    $('.confirmation-dialog-button-panel').css({
+    $(dialog).find('.confirmation-dialog-button-panel').css({
       'display': 'inline',
     });
 
-    $('.confirmation-dialog-button-panel').css({
+    $(dialog).find('.confirmation-dialog-button-panel').css({
       'padding': '30px',
       'display': 'block',
     });
 
-    $('.confirmation-dialog-button-panel a').css({
+    $(dialog).find('.confirmation-dialog-button-panel a').css({
       'margin': '20px',
       'padding': '10px',
       'border-radius': '6px',
@@ -1433,28 +1496,30 @@ Manual saving is not required.\
       'color': '#F8F8F8',
     });
 
-    $('.confirmation-dialog-button-panel a').mouseover(function(e) {
+    $(dialog).find('.confirmation-dialog-button-panel a')
+      .mouseover(function(e) {
       $(this).css({
         'text-decoration': 'none',
         'opacity': '0.8',
       });
     });
 
-    $('.confirmation-dialog-button-panel a').mouseout(function(e) {
+    $(dialog).find('.confirmation-dialog-button-panel a')
+      .mouseout(function(e) {
       $(this).css({
         'opacity': '1.0',
       });
     });
 
-    $('.confirmation-dialog-yes-button').css({
+    $(dialog).find('.confirmation-dialog-yes-button').css({
       'background-color': 'green',
     });
 
-    $('.confirmation-dialog-no-button').css({
+    $(dialog).find('.confirmation-dialog-no-button').css({
       'background-color': '#AF1212',
     });
 
-    $('.confirmation-dialog-backdrop').css({
+    $(dialog).find('.confirmation-dialog-backdrop').css({
       'position': 'fixed',
       'top': '0',
       'left': '0',
@@ -1464,16 +1529,30 @@ Manual saving is not required.\
       'z-index': '9998',
     });
 
-    $('.confirmation-dialog-body').css({
+    $(dialog).find('.confirmation-dialog-body').css({
       'z-index': '9999',
     });
+
+    // Append the element.
+    if (animation == 'yes') {
+      $('body').append($(dialog).hide().fadeIn());
+    } else {
+      $('body').append($(dialog)).show();
+    }
+
 
     // Functionality
 
     var hideDialog = function() {
-      $(dialog).fadeOut(function() {
-        $(this).remove('fast');
-      });
+      if (animation == 'yes') {
+        $(dialog).fadeOut(function() {
+          $(this).remove('fast');
+        });
+      } else {
+        $(dialog).hide(0, function() {
+          $(this).remove('fast');
+        });
+      }
     };
 
     // Handle a `Yes' button click.
@@ -1563,7 +1642,7 @@ Manual saving is not required.\
       'background-color': '#FEFEFD',
       'border': '1px solid rgba(0, 0, 0, 0.3)',
       'box-shadow': '0 2px 35px rgba(50, 50, 150, 0.3)',
-      'z-index': '9999',
+      'z-index': '9997',
       'overflow': 'auto',
     });
 
@@ -1578,7 +1657,7 @@ Manual saving is not required.\
       'background-color': 'rgba(255, 255, 255, 0.5)',
       'width': '100%',
       'height': '100%',
-      'z-index': '9998',
+      'z-index': '9996',
     });
 
     $('.info-modal-close-button').css({
