@@ -28,6 +28,7 @@
               <button type="button" class="btn btn-link btn-sm import-data-button">Import</button>
               <button type="button" class="btn btn-link btn-sm export-data-button">Export</button>
 	      <div class="drop-menu-separator"></div>
+              <button type="button" class="btn btn-link btn-sm app-stats-button">Stats</button>
               <button type="button" class="btn btn-link btn-sm app-info-button">Info</button>
             </div>
 	  </div>
@@ -150,7 +151,7 @@
       <div class="task-description-non-editable">
 	<pre class="task-description"><% if(description.length > 0) { %><%- description %><% } else { %><hr class="invisible" /><p class="text-center"><em class="text-muted">There is no description yet.</em><hr class="invisible" /></p><% } %></pre>
 	<p class="text-right">
-	  <button type="button" class="btn btn-link button-mute task-description-remove-button">Remove</button>
+	  <button type="button" class="btn btn-link button-mute task-description-remove-button">Remove description</button>
 	  <button type="button" class="btn btn-link button-mute task-description-edit-button"><% if(description.length > 0) { %><%- "Edit" %><% } else { %><%- "Add description" %><% } %></button>
 	</p>
       </div>
@@ -162,6 +163,91 @@
 	  <button type="button" class="btn btn-primary button-primary task-description-save-button">Save</button>
 	</div>
 	<hr class="invisible" />
+      </div>
+    </script>
+
+    <script type="text/template" id="stats-template">
+      <div class="app-stats">
+        <h2 class="text-center list-group-item bg-neutral">Stats</h2>
+
+	<hr class="invisible" />
+
+        <div class="list-group-item">
+          <h3>Totals</h3>
+
+          <table class="table table-striped table-bordered table-hover table-condensed">
+            <tbody>
+              <tr>
+		<td>Number of tasks</td>
+		<td><%- totals.tasksNum %></td>
+              </tr>
+
+              <tr>
+		<td>Number of projects</td>
+		<td><%- totals.projectsNum %></td>
+              </tr>
+            </tbody>
+
+            <tbody>
+              <tr>
+		<td>Number of <em>Urgent + important</em> tasks</td>
+		<td><%- totals.urgentImportantTaskListNum %></td>
+              </tr>
+
+              <tr>
+		<td>Number of <em>Not urgent + important</em> tasks</td>
+		<td><%- totals.notUrgentImportantTaskListNum %></td>
+              </tr>
+
+              <tr>
+		<td>Number of <em>Urgent + not important</em> tasks</td>
+		<td><%- totals.urgentNotImportantTaskListNum %></td>
+              </tr>
+
+              <tr>
+		<td>Number of <em>Not urgent + not important</em> tasks</td>
+		<td><%- totals.notUrgentNotImportantTaskListNum %></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <hr class="invisible" />
+
+        <div class="list-group-item">
+          <h3>Number of Tasks per Project</h3>
+
+          <% _.each(projects, function(project) { %>
+          <div class="panel panel-default panel-body">
+            <p><strong><%- project.name %></strong></p>
+
+            <ul class="list-group">
+
+              <li class="list-group-item">
+		<span class="badge"><%- project.urgentImportantTaskListNum %></span>
+		Urgent + important
+              </li>
+
+              <li class="list-group-item">
+		<span class="badge"><%- project.notUrgentImportantTaskListNum %></span>
+		Not urgent + important
+              </li>
+
+              <li class="list-group-item">
+		<span class="badge"><%- project.urgentNotImportantTaskListNum %></span>
+		Urgent + not important
+              </li>
+
+              <li class="list-group-item">
+		<span class="badge"><%- project.notUrgentNotImportantTaskListNum %></span>
+		Not urgent + not important
+              </li>
+
+            </ul>
+          </div>
+          <% }) %>
+        </div>
+
       </div>
     </script>
 

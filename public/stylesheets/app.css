@@ -25,6 +25,10 @@ hr .invisible {
   text-align: center;
 }
 
+.bg-neutral {
+  background-color: #E1E1E1;
+}
+
 .editable-field {
   cursor: text;
 }

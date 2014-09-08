@@ -16,6 +16,7 @@ $(document).ready(function() {
     taskListViewTemplateId: 'task-list-view-template',
     projectListItemTemplateId: 'project-list-item-template',
     taskViewInfoTemplateId: 'task-view-info-template',
+    statsTemplateId: 'stats-template',
 
     taskViewClass: 'task-view',
     taskViewDataAttributeTaskId: 'data-task-id',
@@ -84,6 +85,9 @@ $(document).ready(function() {
 
     // Info Modal
     appInfoButtonClass: 'app-info-button',
+
+    appStatsClass: 'app-stats',
+    appStatsButtonClass: 'app-stats-button',
   }
 
 
@@ -1146,6 +1150,72 @@ this task?',
       that.highlightFirstProject();
     };
 
+    that.showStats = function() {
+      var data = {
+	totals: {
+	  projectsNum: self.app.projectListView.model.length,
+	  tasksNum: 0,
+	  urgentImportantTaskListNum: 0,
+	  notUrgentImportantTaskListNum: 0,
+	  urgentNotImportantTaskListNum: 0,
+	  notUrgentNotImportantTaskListNum: 0,
+	  tasksWithDescriptionNum: 0,
+	},
+	projects: [],
+      };
+
+      var numUrgentImportantTaskListTasks = 0;
+      var projects = self.app.projectListView.model.models;
+      _.each(projects, function(project) {
+	var urgentImportantTaskListNum =
+	  project.attributes.urgentImportantTaskList.length;
+	var notUrgentImportantTaskListNum =
+	  project.attributes.notUrgentImportantTaskList.length;
+	var urgentNotImportantTaskListNum =
+	  project.attributes.urgentNotImportantTaskList.length;
+	var notUrgentNotImportantTaskListNum =
+	  project.attributes.notUrgentNotImportantTaskList.length;
+
+	data.projects.unshift({
+	  name: project.attributes.name,
+
+	  urgentImportantTaskListNum:
+	  urgentImportantTaskListNum,
+
+	  notUrgentImportantTaskListNum:
+	  notUrgentImportantTaskListNum,
+
+	  urgentNotImportantTaskListNum:
+	  urgentNotImportantTaskListNum,
+
+	  notUrgentNotImportantTaskListNum:
+	  notUrgentNotImportantTaskListNum,
+	});
+
+	data.totals.urgentImportantTaskListNum +=
+	urgentImportantTaskListNum;
+
+	data.totals.notUrgentImportantTaskListNum +=
+	notUrgentImportantTaskListNum;
+
+	data.totals.urgentNotImportantTaskListNum +=
+	urgentNotImportantTaskListNum;
+
+	data.totals.notUrgentNotImportantTaskListNum +=
+	notUrgentNotImportantTaskListNum;
+
+	data.totals.tasksNum +=
+	urgentImportantTaskListNum +
+	  notUrgentImportantTaskListNum +
+	  urgentNotImportantTaskListNum +
+	  notUrgentNotImportantTaskListNum;
+
+      });
+
+      var html =_.template($('#' + self.names.statsTemplateId)
+			   .html(), data);      
+      self.infoBox($(html));
+    };
   };
 
   self.app = new self.App();
@@ -1306,12 +1376,13 @@ this task?',
     e.preventDefault();
     self.infoBox(
       '\
-<h2>Info</h2>\
+<h2 class="text-center list-group-item bg-neutral">Info</h2>\
+<hr/>\
 \
 \
 <p>\
-<em>Eisenhower</em>\
-lets you manage tasks using the\
+<em>Eisenhower</em> \
+lets you manage tasks using the \
 <a href="http://en.wikipedia.org/wiki/Time_management#The_Eisenhower_Method">\
 Eisenhower method\
 </a>\
@@ -1424,6 +1495,13 @@ Manual saving is not required.\
 '
     );
   });
+
+  // App stats
+
+  $('.' + self.names.appStatsButtonClass).click(function(e) {
+    self.app.showStats();
+  });
+
 
   //=======================================================================
   // Confirmation menu
