@@ -249,6 +249,7 @@ hr .invisible {
 
 .project-list-item a:hover {
   color: #919191;
+  background-color: #E1E1E1;
   font-weight: bold;
   border-left: 5px solid #919191;
   padding-left: 30px;
@@ -534,4 +535,15 @@ hr .invisible {
 
 .task-selection-toggle input[type=checkbox]:checked + label:after {
   opacity: 0.8;
+}
+
+
+/**************************************************************************
+ * Sortable placeholders
+ *************************************************************************/
+
+.projects-sortable-placeholder {
+  background-color: #CDCDCD;
+  border-left: 5px solid #B5B5B5;
+  height: 50px;
 }

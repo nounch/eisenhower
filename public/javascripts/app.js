@@ -23,9 +23,10 @@ $(document).ready(function() {
     taskViewInfoBoxAnchorClass: 'task-view-info-box-anchor',
     taskViewInfoBoxContentClass: 'task-view-info-box-content',
     taskListViewClass: 'task-list-view',
-    projectListViewId: 'project-list-view',
+    projectListViewClass: 'project-list-view',
     projectListViewAnchorId: 'projects-list-anchor',
     projectListItemClass: 'project-list-item',
+    projectsSortablePlaceholderClass: 'projects-sortable-placeholder',
     projectNonEditableClass: 'project-non-editable',
     projectTextBoxClass: 'project-text-box',
     addProjectInputId: 'add-project-input',
@@ -96,77 +97,83 @@ $(document).ready(function() {
   self.makeProjectDroppable = function(project) {
     $(project.$el).droppable({
       drop: function(event, ui) {
-        $(this).css({
-          'background-color': self.originalDroppableBackgroundColor,
-        });
-        var projectCid = $(this).find('a').attr(
-          self.names.projectListItemDataAttributeId);
-        var taskCid = $(ui.draggable).attr(
-          self.names.taskViewDataAttributeTaskId)
-
-        // Do nothing, if the target is the current project.
-        if (projectCid != self.app.currentProject.cid) {
-          var movedTask = null;
-
-          // Search all taks lists and remove the task from its current one.
-          // (Not important here, but for huge lists this could potentially
-          // be faster than speculatively calling Backbone's `remove' on all
-          // of them. Not verified! In any case, it allows for additional or
-          // less task lists in the future.).
-          var keys = Object.keys(self.app.taskLists);
-          _.each(keys, function(key) {
-            var taskList = self.app.taskLists[key];
-            taskList.model.each(function(task) {
-              if (task.cid == taskCid) {
-                movedTask = task;
-                taskList.model.remove(taskCid);
-              }
-            });
+        if (self.app.projectsDroppable) {
+          $(this).css({
+            'background-color': self.originalDroppableBackgroundColor,
           });
+          var projectCid = $(this).find('a').attr(
+            self.names.projectListItemDataAttributeId);
+          var taskCid = $(ui.draggable).attr(
+            self.names.taskViewDataAttributeTaskId)
 
-          // Remove the DOM element. This is more efficient than
-          // rerendering the whole current project.
-          $(ui.draggable).remove();
+          // Do nothing, if the target is the current project.
+          if (projectCid != self.app.currentProject.cid) {
+            var movedTask = null;
 
-          // Add the task to its new project (target project).
-          var targetProject = self.app.projectListView.model
-            .findWhere({cid: projectCid});
+            // Search all taks lists and remove the task from its current one.
+            // (Not important here, but for huge lists this could potentially
+            // be faster than speculatively calling Backbone's `remove' on all
+            // of them. Not verified! In any case, it allows for additional or
+            // less task lists in the future.).
+            var keys = Object.keys(self.app.taskLists);
+            _.each(keys, function(key) {
+              var taskList = self.app.taskLists[key];
+              taskList.model.each(function(task) {
+		if (task.cid == taskCid) {
+                  movedTask = task;
+                  taskList.model.remove(taskCid);
+		}
+              });
+            });
 
-          self.app.norender = true;
-          targetProject.attributes.urgentImportantTaskList
-            .unshift(movedTask);
-          self.app.norender = false;
+            // Remove the DOM element. This is more efficient than
+            // rerendering the whole current project.
+            $(ui.draggable).remove();
+
+            // Add the task to its new project (target project).
+            var targetProject = self.app.projectListView.model
+              .findWhere({cid: projectCid});
+
+            self.app.norender = true;
+            targetProject.attributes.urgentImportantTaskList
+              .unshift(movedTask);
+            self.app.norender = false;
+          }
+
         }
-
       },
       over: function(event, ui) {
-        // This timeout is coordinated with the `out' timeout and prevents
-        // the dragged elemnt to accidentially have the wront styleing when
-        // moving the cursor too fast.
-        setTimeout(function() {
-          $(ui.draggable).css({
-            'opacity': '0.25',
+        if (self.app.projectsDroppable) {
+          // This timeout is coordinated with the `out' timeout and prevents
+          // the dragged elemnt to accidentially have the wront styleing when
+          // moving the cursor too fast.
+          setTimeout(function() {
+            $(ui.draggable).css({
+              'opacity': '0.25',
+            });
+          }, 20);
+          self.originalDroppableBackgroundColor = $(this)
+            .css('background-color');
+          $(this).css({
+            'background-color': '#CDCDCD',
           });
-        }, 20);
-        self.originalDroppableBackgroundColor = $(this)
-          .css('background-color');
-        $(this).css({
-          'background-color': '#CDCDCD',
-        });
+	}
       },
       out: function(event, ui) {
-        // This timeout is coordinated with the `over' timeout and prevents
-        // the dragged elemnt to accidentially have the wront styleing when
-        // moving the cursor too fast.
-        setTimeout(function() {
-          $(ui.draggable).css({
-            'opacity': '1.0',
-          });
-        }, 10);
+        if (self.app.projectsDroppable) {
+          // This timeout is coordinated with the `over' timeout and prevents
+          // the dragged elemnt to accidentially have the wront styleing when
+          // moving the cursor too fast.
+          setTimeout(function() {
+            $(ui.draggable).css({
+              'opacity': '1.0',
+            });
+          }, 10);
 
-        $(this).css({
-          'background-color': self.originalDroppableBackgroundColor,
-        });
+          $(this).css({
+            'background-color': self.originalDroppableBackgroundColor,
+          });
+	}
       },
     });
   };
@@ -640,7 +647,7 @@ this task?',
 
   self.ProjectListView = Backbone.View.extend({
     tagName: 'div',
-    id: self.names.projectListViewId,
+    id: self.names.projectListViewClass,
     render: function() {
       $('#' + self.names.projectListViewAnchorId).empty();
       _.each(this.model.models, function(project) {
@@ -668,6 +675,10 @@ this task?',
     that.currentProject = null;
     that.dropTargetTaskList = null;
     that.dragSourceTaskList = null;
+    // This indicates if projects should be droppable. Example use case:
+    // Allow tasks to be dropped onto projects, but disallow projects to be
+    // dropped onto other projects while sorting projects.
+    that.projectsDroppable = true;
     // This is a quasi-global (!) variable that tells functions that are
     // bound to triggers (i.e. `add') that the corresponding DOM element
     // should not be (re-)rendered. Example: Dropping a task onto a project
@@ -1299,6 +1310,32 @@ this task?',
     },
   }).disableSelection();
 
+  $('.' + self.names.projectListViewClass).sortable({
+    placeholder: self.names.projectsSortablePlaceholderClass,
+    start: function(e, ui) {
+      self.app.projectsDroppable = false;
+      ui.item.css({
+	'box-shadow': '0 10px 10px rgba(0, 0, 60, 0.3)',
+	'opacity': '0.3',
+      });
+      ui.item.data('project-start-index', ui.item.index());
+    },
+    stop: function(e, ui) {
+      ui.item.css({
+	'box-shadow': 'none',
+	'opacity': '1.0',
+      });
+
+      var startPos = ui.item.data('project-start-index');
+      var stopPos = ui.item.index();
+      var project = self.app.projectListView.model.at(startPos).clone();
+      self.app.projectListView.model.models.splice(startPos, 1);
+      self.app.projectListView.model.add(project, {at: stopPos});
+
+      self.app.projectsDroppable = true;
+    },
+  });
+
 
   //=======================================================================
   // Buttons etc.
@@ -1434,6 +1471,10 @@ and give your new project a name.\
 <p>\
 A project can be renamed by double clicking its name in the project \
 list.\
+</p>\
+\
+<p>\
+Projects in the project list can be sorted using drag & drop.\
 </p>\
 \
 \
