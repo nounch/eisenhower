@@ -147,7 +147,16 @@
 
     <script type="text/template" id="task-view-info-template">
       <div class="list-group">
-	<div class="list-group-item">
+        <em class="text-muted list-group-item">
+	  <small>
+            <span><%- projectName %></span>
+            <span>&nbsp;&gt;&nbsp;</span>
+            <span><%- taskListName %></span>
+            <span>&nbsp;&gt;&nbsp;</span>
+            <span><%- name %></span>
+	  </small>
+        </em>
+	<div class="list-group-item bg-very-neutral">
           <h2 class="task-description-name"><% if (selected) { %><span class="text-muted checkmark">&#x2713;</span><% } %><%- name %></h2>
           <span class="text-muted date-element"><%- new Date(parseInt(created)).toDateString() %></span>
 	</div>

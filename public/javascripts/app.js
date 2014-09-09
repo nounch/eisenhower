@@ -251,11 +251,29 @@ $(document).ready(function() {
     tagName: 'div',
     className: self.names.taskViewClass,
     infoBoxElement: null,
+    taskListName: '',
     initialize: function(options) {
       var that = this;
 
       // The element to which the view should be appended.
       this.element = options['element'];
+
+      // Name of the task list the task of this task view is part of.
+      var taskListName = '';
+      if (options['taskListName'] ==
+	  'urgent-important-list') {
+	taskListName = 'Urgent + important'
+      } else if (options['taskListName'] ==
+		 'not-urgent-important-list') {
+	taskListName = 'Not urgent + important'
+      } else if (options['taskListName'] ==
+		 'urgent-not-important-list') {
+	taskListName = 'Urgent + not important'
+      } else if (options['taskListName'] ==
+		 'urgent-not-important-not-list') {
+	taskListName = 'Not urgent + not important'
+      }
+      this.taskListName = taskListName;
 
       // Bind events.
       this.events['click .' + self.names.removeTaskButtonClass] =
@@ -311,6 +329,11 @@ $(document).ready(function() {
     },
     showInfo: function(e) {
       var that = this;
+      // Add the project name (not know at the time of the task view
+      // creation).
+      this.model.attributes.projectName =
+	self.app.currentProject.attributes.name;
+      this.model.attributes.taskListName = this.taskListName;
       var html = this.infoTemplate(this.model);
       var element = $(html);
       self.infoBox(element, {
@@ -523,7 +546,8 @@ this task?',
         // Append the subview HTML to this parent view by making the
         // subview append itself when given a handle to the parent view
         // element.
-        new self.TaskView({model: task, element: $('#' + id)}).render();
+        new self.TaskView({model: task, element: $('#' + id), taskListName:
+			   that.name}).render();
       });
 
       return this;

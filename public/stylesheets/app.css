@@ -29,6 +29,10 @@ hr .invisible {
   background-color: #E1E1E1;
 }
 
+.bg-very-neutral {
+  background-color: #F8F8F9;
+}
+
 .editable-field {
   cursor: text;
 }
@@ -443,11 +447,10 @@ hr .invisible {
  *************************************************************************/
 
 .task-description {
-  background-color: #FEFEFD;
   border: none;
   font-family: Helvetica;
   margin-bottom: 50px;
-  background-color: #F8F8F9;
+  background-color: #FEFEFD;
   font-size: 15px;
 }
 
