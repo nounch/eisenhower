@@ -146,23 +146,27 @@
     </script>
 
     <script type="text/template" id="task-view-info-template">
-      <h2 class="task-description-name"><% if (selected) { %><span class="text-muted checkmark">&#x2713;</span><% } %><%- name %></h2>
-      <span class="text-muted date-element"><%- new Date(parseInt(created)).toDateString() %></span>
-      <div class="task-description-non-editable">
-	<pre class="task-description"><% if(description.length > 0) { %><%- description %><% } else { %><hr class="invisible" /><p class="text-center"><em class="text-muted">There is no description yet.</em><hr class="invisible" /></p><% } %></pre>
-	<p class="text-right">
-	  <button type="button" class="btn btn-link button-mute task-description-remove-button">Remove description</button>
-	  <button type="button" class="btn btn-link button-mute task-description-edit-button"><% if(description.length > 0) { %><%- "Edit" %><% } else { %><%- "Add description" %><% } %></button>
-	</p>
-      </div>
-      <div class="task-description-edit-panel collapse">
-	<textarea class="form-control task-description-textarea" rows="10" cols="100"><%- description %></textarea>
-	<hr class="invisible" />
-	<div class="text-center">
-	  <button type="button" class="btn btn-link button-mute task-description-cancel-button">Cancel</button>
-	  <button type="button" class="btn btn-primary button-primary task-description-save-button">Save</button>
+      <div class="list-group">
+	<div class="list-group-item">
+          <h2 class="task-description-name"><% if (selected) { %><span class="text-muted checkmark">&#x2713;</span><% } %><%- name %></h2>
+          <span class="text-muted date-element"><%- new Date(parseInt(created)).toDateString() %></span>
 	</div>
-	<hr class="invisible" />
+	<div class="task-description-non-editable list-group-item">
+          <p class="text-right">
+            <button type="button" class="btn btn-link button-mute task-description-remove-button">Remove description</button>
+            <button type="button" class="btn btn-link button-mute task-description-edit-button"><u><% if(description.length > 0) { %><%- "Edit" %><% } else { %><%- "Add description" %><% } %></u></button>
+          </p>
+          <pre class="task-description"><% if(description.length > 0) { %><%- description %><% } else { %><hr class="invisible" /><p class="text-center"><em class="text-muted">There is no description yet.</em><hr class="invisible" /></p><% } %></pre>
+	</div>
+	<div class="task-description-edit-panel collapse">
+          <textarea class="form-control task-description-textarea" rows="10" cols="100"><%- description %></textarea>
+          <hr class="invisible" />
+          <div class="text-center">
+            <button type="button" class="btn btn-link button-mute task-description-cancel-button">Cancel</button>
+            <button type="button" class="btn btn-primary button-primary task-description-save-button">Save</button>
+          </div>
+          <hr class="invisible" />
+	</div>
       </div>
     </script>
 
