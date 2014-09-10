@@ -342,6 +342,10 @@ hr .invisible {
   background: none;
 }
 
+.help-button {
+  margin-top: 3px;
+}
+
 .button-mute {
   color: #919191;
 }
