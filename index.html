@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+    <link rel="stylesheet" href="public/stylesheets/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="public/stylesheets/app.css" type="text/css" />
+    <meta charset="utf-8" />
+
+  </head>
+
+  <body>
+
+    <div id="new-task-input-box" class="rowfluid">
+      <div class="container">
+        <div class="col col-md-2 main-logo">
+          <span>Eisenhower</span>
+        </div>
+        <button type="button" class="btn btn-link btn-sm app-info-button help-button">Help</button>
+        <a href="http://github.com/nounch/eisenhower" class="btn btn-link btn-sm app-info-button help-button">Project on GitHub</a>
+        <div class="col col-md-4 col-md-offset-2">
+          <input type="text" id="new-task-input" class="form-control" value="" placeholder="Add a new task"/>
+        </div>
+        <div class="top-bar-buttons pull-right">
+
+	  <div class="drop-menu">
+            <button type="button" class="btn btn-link btn-xs options-button drop-menu-button">Options</button>
+            <div class="drop-menu-body">
+              <button type="button" class="btn btn-link btn-sm remove-selected-button" title="Remove all selected tasks">&times; Remove selected tasks</button>
+              <button type="button" class="btn btn-link btn-sm remove-current-project-button" title="Remove current project">&times; Remove current project</button>
+              <button type="button" class="btn btn-link btn-sm import-data-button">Import</button>
+              <button type="button" class="btn btn-link btn-sm export-data-button">Export</button>
+	      <div class="drop-menu-separator"></div>
+              <button type="button" class="btn btn-link btn-sm app-stats-button">Stats</button>
+              <button type="button" class="btn btn-link btn-sm app-info-button">Info</button>
+            </div>
+	  </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="row">
+        <div class="col col-md-12" id="main-content">
+
+	  <div class="row data-import-panel collapse">
+	    <div class="panel panel-default panel-body col col-md-12">
+	      <button type="button" class="btn btn-link pull-right close-button data-import-panel-close-button">&times;</button>
+	      <h2>Import Data <small>- Projects and Tasks</small></h2>
+	      <textarea class="form-control data-import-textarea" rows="5" cols="80"></textarea>
+	      <div class="text-center">
+		<hr class="invisible"/>
+		<button type="button" class="btn btn-primary button-primary data-import-button">Import</button>
+	      </div>
+	    </div>
+	  </div>
+
+	  <div class="row data-export-panel collapse">
+	    <div class="panel panel-default panel-body col col-md-12">
+	      <button type="button" class="btn btn-link pull-right close-button data-export-panel-close-button">&times;</button>
+	      <h2>Export Data <small>- Projects and Tasks</small></h2>
+	      <textarea class="form-control data-export-textarea textarea-readonly" rows="5" cols="80" readonly></textarea>
+	    </div>
+	  </div>
+
+          <div class="row">
+            <ul class="col col-md-3">
+              <input type="" id="add-project-input" value="" placeholder="Add a new project" />
+              <div id="projects-list-anchor" class="project-list-view">
+
+              </div>
+            </ul>
+
+            <div class="task-box-area col col-md-9">
+              <div class="task-box-row row card-box">
+                <div class="col col-md-6">
+                  <span class="task-box-title">Urgent + important</span>
+                  <div class="task-box">
+                    <div class="task-list" id="urgent-important-list">
+
+                    </div>
+                  </div>
+                  <span class="task-box-title">Urgent + not important</span>
+                  <div class="task-box">
+                    <div class="task-list" id="urgent-not-important-list">
+
+                    </div>
+                  </div>
+                </div>
+                <div class="col col-md-6">
+                  <span class="task-box-title">Not urgent + important</span>
+                  <div class="task-box">
+                    <div class="task-list" id="not-urgent-important-list">
+
+                    </div>
+                  </div>
+                  <span class="task-box-title">Not urgent + not important</span>
+                  <div class="task-box">
+                    <div class="task-list" id="not-urgent-not-important-list">
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="text/javascript" src="public/javascripts/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="public/javascripts/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="public/javascripts/underscore-min.js"></script>
+    <script type="text/javascript" src="public/javascripts/backbone-min.js"></script>
+    <script type="text/javascript" src="public/javascripts/backbone.localStorage-min.js"></script>
+    <script type="text/javascript" src="public/javascripts/app.js"></script>
+
+    <script type="text/template" id="task-view-template">
+      <div class="pull-left task-selection-toggle">
+	<input type="checkbox" name="task-selection-toggle-input" <% if(selected) { %><%- 'checked=""' %><% } %>/>
+	<label for="task-selection-toggle-input"></label>
+      </div>
+      <div class="task-non-editable">
+        <div class="task-name" title="<%- name %>"><%- name %></div>
+	<button type="button" class="pull-right task-has-description-indicator">?</button>
+	<button type="button" class="pull-right task-info-button">?</button>
+	<div class="">
+	  <button type="button" class="pull-right remove-task-button">&times;</button>
+	</div>
+      </div>
+
+      <input type="text" class="task-text-box collapse" value="<%- name %>" />
+      <div class="task-view-info-box-anchor collapse"></div>
+    </script>
+
+    <script type="text/template" id="task-list-view-template">
+
+    </script>
+
+    <script type="text/template" id="project-list-item-template">
+      <div class="project-non-editable">
+        <a href="#" class="btn project-list-item" title="<%- project.name %>" data-project-id="<%- project.cid %>"><%- project.name %></a>
+      </div>
+      <input type="text" class="project-text-box collapse" value="<%- project.name %>" />
+    </script>
+
+    <script type="text/template" id="task-view-info-template">
+      <div class="list-group">
+        <em class="text-muted list-group-item">
+	  <small>
+            <span><%- projectName %></span>
+            <span>&nbsp;&gt;&nbsp;</span>
+            <span><%- taskListName %></span>
+            <span>&nbsp;&gt;&nbsp;</span>
+            <span><%- name %></span>
+	  </small>
+        </em>
+	<div class="list-group-item bg-very-neutral">
+          <h2 class="task-description-name"><% if (selected) { %><span class="text-muted checkmark">&#x2713;</span><% } %><%- name %></h2>
+          <span class="text-muted date-element"><%- new Date(parseInt(created)).toDateString() %></span>
+	</div>
+	<div class="task-description-non-editable list-group-item">
+          <p class="text-right">
+            <button type="button" class="btn btn-link button-mute task-description-remove-button">Remove description</button>
+            <button type="button" class="btn btn-link button-mute task-description-edit-button"><u><% if(description.length > 0) { %><%- "Edit" %><% } else { %><%- "Add description" %><% } %></u></button>
+          </p>
+          <pre class="task-description"><% if(description.length > 0) { %><%- description %><% } else { %><hr class="invisible" /><p class="text-center"><em class="text-muted">There is no description yet.</em><hr class="invisible" /></p><% } %></pre>
+	</div>
+	<div class="task-description-edit-panel collapse">
+          <textarea class="form-control task-description-textarea" rows="10" cols="100"><%- description %></textarea>
+          <hr class="invisible" />
+          <div class="text-center">
+            <button type="button" class="btn btn-link button-mute task-description-cancel-button">Cancel</button>
+            <button type="button" class="btn btn-primary button-primary task-description-save-button">Save</button>
+          </div>
+          <hr class="invisible" />
+	</div>
+      </div>
+    </script>
+
+    <script type="text/template" id="stats-template">
+      <div class="app-stats">
+        <h2 class="text-center list-group-item bg-neutral">Stats</h2>
+
+	<hr class="invisible" />
+
+        <div class="list-group-item">
+          <h3>Totals</h3>
+
+          <table class="table table-striped table-bordered table-hover table-condensed">
+            <tbody>
+              <tr>
+		<td>Number of tasks</td>
+		<td><%- totals.tasksNum %></td>
+              </tr>
+
+              <tr>
+		<td>Number of projects</td>
+		<td><%- totals.projectsNum %></td>
+              </tr>
+            </tbody>
+
+            <tbody>
+              <tr>
+		<td>Number of <em>Urgent + important</em> tasks</td>
+		<td><%- totals.urgentImportantTaskListNum %></td>
+              </tr>
+
+              <tr>
+		<td>Number of <em>Not urgent + important</em> tasks</td>
+		<td><%- totals.notUrgentImportantTaskListNum %></td>
+              </tr>
+
+              <tr>
+		<td>Number of <em>Urgent + not important</em> tasks</td>
+		<td><%- totals.urgentNotImportantTaskListNum %></td>
+              </tr>
+
+              <tr>
+		<td>Number of <em>Not urgent + not important</em> tasks</td>
+		<td><%- totals.notUrgentNotImportantTaskListNum %></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <hr class="invisible" />
+
+        <div class="list-group-item">
+          <h3>Number of Tasks per Project</h3>
+
+          <% _.each(projects, function(project) { %>
+          <div class="panel panel-default panel-body">
+            <p><strong><%- project.name %></strong></p>
+
+            <ul class="list-group">
+
+              <li class="list-group-item">
+		<span class="badge"><%- project.urgentImportantTaskListNum %></span>
+		Urgent + important
+              </li>
+
+              <li class="list-group-item">
+		<span class="badge"><%- project.notUrgentImportantTaskListNum %></span>
+		Not urgent + important
+              </li>
+
+              <li class="list-group-item">
+		<span class="badge"><%- project.urgentNotImportantTaskListNum %></span>
+		Urgent + not important
+              </li>
+
+              <li class="list-group-item">
+		<span class="badge"><%- project.notUrgentNotImportantTaskListNum %></span>
+		Not urgent + not important
+              </li>
+
+            </ul>
+          </div>
+          <% }) %>
+        </div>
+
+      </div>
+    </script>
+
+  </body>
+</html>
